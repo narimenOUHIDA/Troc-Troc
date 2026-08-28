@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: troctroc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: troctroc
+      POSTGRES_PASSWORD: troctroc
+      POSTGRES_DB: troctroc
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U troctroc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
