@@ -1,36 +1,66 @@
+/* Charte graphique v1 (docs/conception/troctroc-sprint0-slides.html, slide "Charte graphique") :
+   fond sombre, texte clair, vert "Confiance" pour les actions, doré "Repère" pour les mises en avant.
+   Version 1, à affiner en Sprint 1. */
+:root {
+	--color-fond: #0f1b24;
+	--color-papier: #eceee7;
+	--color-confiance: #4fa894;
+	--color-repere: #e0a63c;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
 body {
 	margin: 0;
 	font-family:
 		system-ui,
 		-apple-system,
 		sans-serif;
-	color: #1a1a1a;
+	background: var(--color-fond);
+	color: var(--color-papier);
 }
 
+/* Mobile-first : sur petit écran le header s'empile en 3 lignes (logo+auth / recherche / nav) via
+   flex-wrap + order, pour garder de grandes zones tactiles sans faire tenir 4 blocs sur une seule ligne
+   étroite. À partir de 48rem (768px) il repasse sur une seule ligne (cf. media query en bas de fichier). */
 .site-header {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 1.5rem;
+	gap: 0.75rem 1.5rem;
 	padding: 1rem 1.5rem;
-	border-bottom: 1px solid #e5e5e5;
+	border-bottom: 1px solid rgba(236, 238, 231, 0.15);
 }
 
 .logo {
+	order: 1;
 	font-weight: 700;
 	text-decoration: none;
 	color: inherit;
 }
 
 .header-search {
-	flex: 1;
+	order: 3;
+	flex-basis: 100%;
 }
 
 .header-search input {
 	width: 100%;
-	max-width: 24rem;
+	max-width: none;
 	padding: 0.5rem 0.75rem;
-	border: 1px solid #ccc;
+	border: 1px solid rgba(236, 238, 231, 0.25);
 	border-radius: 0.375rem;
+	background: rgba(236, 238, 231, 0.05);
+	color: var(--color-papier);
+}
+
+.header-nav {
+	order: 4;
+	flex-basis: 100%;
 }
 
 .header-nav a {
@@ -39,6 +69,8 @@ body {
 }
 
 .header-auth {
+	order: 2;
+	margin-left: auto;
 	display: flex;
 	gap: 1rem;
 	align-items: center;
@@ -50,8 +82,8 @@ body {
 }
 
 .button-primary {
-	background: #1a7f4e;
-	color: #fff !important;
+	background: var(--color-confiance);
+	color: var(--color-fond) !important;
 	padding: 0.5rem 1rem;
 	border-radius: 0.375rem;
 }
@@ -59,7 +91,7 @@ body {
 .hero {
 	text-align: center;
 	padding: 3rem 1.5rem;
-	background: #f6f8f7;
+	background: #152535;
 }
 
 .hero h1 {
@@ -67,34 +99,29 @@ body {
 	font-size: 1.75rem;
 }
 
+/* Mobile-first : champs empilés en pleine largeur (grandes zones tactiles). Repasse en ligne
+   à partir de 48rem, cf. media query en bas de fichier. */
 .hero-search {
 	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
+	flex-direction: column;
 	gap: 0.75rem;
 }
 
 .hero-search input {
+	width: 100%;
 	padding: 0.6rem 0.9rem;
-	border: 1px solid #ccc;
+	border: 1px solid rgba(236, 238, 231, 0.25);
 	border-radius: 0.375rem;
-}
-
-.hero-search input[name='q'] {
-	flex: 1;
-	min-width: 16rem;
-}
-
-.hero-search input[name='codePostal'] {
-	width: 8rem;
+	background: rgba(236, 238, 231, 0.05);
+	color: var(--color-papier);
 }
 
 .hero-search button {
 	padding: 0.6rem 1.25rem;
 	border: none;
 	border-radius: 0.375rem;
-	background: #1a7f4e;
-	color: #fff;
+	background: var(--color-confiance);
+	color: var(--color-fond);
 	cursor: pointer;
 }
 
@@ -115,7 +142,7 @@ body {
 	margin: 0;
 	padding: 0;
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
 	gap: 0.75rem;
 }
 
@@ -123,7 +150,7 @@ body {
 	display: block;
 	padding: 0.75rem 1rem;
 	text-align: center;
-	border: 1px solid #e5e5e5;
+	border: 1px solid rgba(236, 238, 231, 0.15);
 	border-radius: 0.5rem;
 	text-decoration: none;
 	color: inherit;
@@ -142,18 +169,18 @@ body {
 	display: block;
 	text-decoration: none;
 	color: inherit;
-	border: 1px solid #e5e5e5;
+	border: 1px solid rgba(236, 238, 231, 0.15);
 	border-radius: 0.5rem;
 	overflow: hidden;
 }
 
 .annonce-photo {
 	aspect-ratio: 4 / 3;
-	background: #e5e5e5;
+	background: rgba(236, 238, 231, 0.08);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #888;
+	color: rgba(236, 238, 231, 0.5);
 	font-size: 0.875rem;
 }
 
@@ -167,8 +194,13 @@ body {
 	font-weight: 600;
 }
 
+.annonce-prix {
+	color: var(--color-repere);
+	font-weight: 600;
+}
+
 .annonce-distance {
-	color: #666;
+	color: rgba(236, 238, 231, 0.6);
 	font-size: 0.875rem;
 	margin-bottom: 0.75rem;
 }
@@ -180,7 +212,7 @@ body {
 	flex-wrap: wrap;
 	gap: 0.75rem;
 	padding: 1.5rem;
-	border-top: 1px solid #e5e5e5;
+	border-top: 1px solid rgba(236, 238, 231, 0.15);
 }
 
 .site-footer p {
@@ -195,4 +227,44 @@ body {
 .site-footer a {
 	color: inherit;
 	text-decoration: none;
+}
+
+/* Palier desktop : au-delà de 48rem (768px) le header et la recherche du hero repassent sur une
+   seule ligne, l'écran étant assez large pour les 4 blocs du header et les 3 champs de recherche. */
+@media (min-width: 48rem) {
+	.header-search {
+		order: 2;
+		flex-basis: auto;
+		flex: 1;
+	}
+
+	.header-search input {
+		max-width: 24rem;
+	}
+
+	.header-nav {
+		order: 3;
+		flex-basis: auto;
+	}
+
+	.header-auth {
+		order: 4;
+		margin-left: 0;
+	}
+
+	.hero-search {
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.hero-search input[name='q'] {
+		flex: 1;
+		min-width: 16rem;
+		width: auto;
+	}
+
+	.hero-search input[name='codePostal'] {
+		width: 8rem;
+	}
 }
