@@ -1,0 +1,198 @@
+body {
+	margin: 0;
+	font-family:
+		system-ui,
+		-apple-system,
+		sans-serif;
+	color: #1a1a1a;
+}
+
+.site-header {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	padding: 1rem 1.5rem;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.logo {
+	font-weight: 700;
+	text-decoration: none;
+	color: inherit;
+}
+
+.header-search {
+	flex: 1;
+}
+
+.header-search input {
+	width: 100%;
+	max-width: 24rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid #ccc;
+	border-radius: 0.375rem;
+}
+
+.header-nav a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.header-auth {
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+}
+
+.header-auth a {
+	text-decoration: none;
+	color: inherit;
+}
+
+.button-primary {
+	background: #1a7f4e;
+	color: #fff !important;
+	padding: 0.5rem 1rem;
+	border-radius: 0.375rem;
+}
+
+.hero {
+	text-align: center;
+	padding: 3rem 1.5rem;
+	background: #f6f8f7;
+}
+
+.hero h1 {
+	margin: 0 0 1.5rem;
+	font-size: 1.75rem;
+}
+
+.hero-search {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+}
+
+.hero-search input {
+	padding: 0.6rem 0.9rem;
+	border: 1px solid #ccc;
+	border-radius: 0.375rem;
+}
+
+.hero-search input[name='q'] {
+	flex: 1;
+	min-width: 16rem;
+}
+
+.hero-search input[name='codePostal'] {
+	width: 8rem;
+}
+
+.hero-search button {
+	padding: 0.6rem 1.25rem;
+	border: none;
+	border-radius: 0.375rem;
+	background: #1a7f4e;
+	color: #fff;
+	cursor: pointer;
+}
+
+.categories,
+.annonces {
+	padding: 2rem 1.5rem;
+	max-width: 72rem;
+	margin: 0 auto;
+}
+
+.categories h2,
+.annonces h2 {
+	margin-top: 0;
+}
+
+.categories-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+	gap: 0.75rem;
+}
+
+.categories-grid a {
+	display: block;
+	padding: 0.75rem 1rem;
+	text-align: center;
+	border: 1px solid #e5e5e5;
+	border-radius: 0.5rem;
+	text-decoration: none;
+	color: inherit;
+}
+
+.annonces-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 1rem;
+}
+
+.annonce-card a {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	border: 1px solid #e5e5e5;
+	border-radius: 0.5rem;
+	overflow: hidden;
+}
+
+.annonce-photo {
+	aspect-ratio: 4 / 3;
+	background: #e5e5e5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #888;
+	font-size: 0.875rem;
+}
+
+.annonce-titre,
+.annonce-prix,
+.annonce-distance {
+	margin: 0.35rem 0.75rem;
+}
+
+.annonce-titre {
+	font-weight: 600;
+}
+
+.annonce-distance {
+	color: #666;
+	font-size: 0.875rem;
+	margin-bottom: 0.75rem;
+}
+
+.site-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	padding: 1.5rem;
+	border-top: 1px solid #e5e5e5;
+}
+
+.site-footer p {
+	margin: 0;
+}
+
+.site-footer nav {
+	display: flex;
+	gap: 1rem;
+}
+
+.site-footer a {
+	color: inherit;
+	text-decoration: none;
+}
