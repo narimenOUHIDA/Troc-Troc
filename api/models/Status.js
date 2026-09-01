@@ -1,6 +1,5 @@
-import { DataTypes, INTEGER, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
-
 
 const Status = sequelize.define(
     "Status",

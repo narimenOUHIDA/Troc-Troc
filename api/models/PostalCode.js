@@ -1,12 +1,12 @@
-import { DataTypes, INTEGER, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
-
 
 const PostalCode = sequelize.define(
     "PostalCode",
     {
         postalCode: {
             type: DataTypes.STRING(10),
+            allowNull: false,
         },
         city: {
             type: DataTypes.STRING(100),

@@ -8,18 +8,12 @@ const Participant = sequelize.define(
         conversationId: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            references: {
-                model: "conversation",
-                key: "id",
-            }
+            allowNull: false,
         },
         userId: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            references: {
-                model: "user",
-                key: "id",
-            }
+            allowNull: false,
         },
     },
     { tableName: "participant", },

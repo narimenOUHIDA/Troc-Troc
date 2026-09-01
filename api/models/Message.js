@@ -1,4 +1,4 @@
-import { DataTypes, INTEGER, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
 
 const Message = sequelize.define(
@@ -19,17 +19,10 @@ const Message = sequelize.define(
         },
         conversationId: {
             type: DataTypes.INTEGER,
-            references: {
-                model: "conversation",
-                key: "id",
-            }
         },
         userId: {
             type: DataTypes.INTEGER,
-            references: {
-                model: "user",
-                key: "id",
-            }
+            allowNull: false,
         },
     },
     { tableName: "message", },

@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
 
 const Listing = sequelize.define(
@@ -25,32 +25,14 @@ const Listing = sequelize.define(
         categoryId : {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: "category",
-                key: "id",
-            },
-            onUpdate: "CASCADE",
-            onDelete: "RESTRICT",
         },
         statusId : {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: "status",
-                key: "id",
-            },
-            onUpdate: "CASCADE",
-            onDelete: "RESTRICT",
         },
         userId : {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: "user",
-                key: "id",
-            },
-            onUpdate: "CASCADE",
-            onDelete: "RESTRICT",
         },
     },
     { tableName: "listing", },

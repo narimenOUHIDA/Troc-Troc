@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
 
 const User = sequelize.define(
@@ -28,12 +28,6 @@ const User = sequelize.define(
         postalCodeId : {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: "postalCode",
-                key: "id",
-            },
-            onUpdate: "CASCADE",
-            onDelete: "RESTRICT",
         },
     },
     { tableName: "user", },

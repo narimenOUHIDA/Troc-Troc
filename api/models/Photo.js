@@ -1,4 +1,4 @@
-import { DataTypes, INTEGER, Model } from "sequelize";
+import { DataTypes } from "sequelize";
 import sequelize from "./sequelize-client.js";
 
 const Photo = sequelize.define(
@@ -8,17 +8,13 @@ const Photo = sequelize.define(
             type: DataTypes.STRING(500),
             allowNull: false,
         },
-        position: {
+        order: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
         listingId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: "listing",
-                key: "id",
-            }
         },
     },
     { tableName: "photo", },
