@@ -49,7 +49,16 @@
 | prenom | texte |
 | email | texte |
 | mot_de_passe | texte |
-| code_postal | texte |
+
+> `code_postal` n'est plus un attribut direct de `UTILISATEUR` depuis le MCD du 01/09/2026 (voir [MCD.pdf](MCD.pdf)) : c'est désormais l'association `HABITE` vers l'entité `CODE_POSTAL` ci-dessous qui porte cette information (avec latitude/longitude en plus, pour le calcul réel du rayon de 50 km).
+
+**CODE_POSTAL**
+| Attribut | Type |
+|---|---|
+| code_postal (id) | texte |
+| ville | texte |
+| latitude | décimal |
+| longitude | décimal |
 
 **CATEGORIE**
 | Attribut | Type |
@@ -78,6 +87,7 @@
 |---|---|
 | id_photo (id) | entier |
 | url | texte |
+| ordre | entier |
 
 **CONVERSATION**
 | Attribut | Type |
@@ -91,13 +101,19 @@
 | id_message (id) | entier |
 | contenu | texte |
 | date_envoi | date |
+| lu | booléen |
 
-> `UTILISATEUR` joue plusieurs rôles différents selon l'association (vendeur pour CREE, participant — acheteur ou vendeur — pour PARTICIPE, expéditeur pour ENVOIE) : ce n'est pas des entités séparées, juste la même table vue sous différents rôles contextuels — conforme au cahier des charges ("Utilisateur authentifié : peut agir comme acheteur ou vendeur selon le contexte").
+> `UTILISATEUR` joue plusieurs rôles différents selon l'association (vendeur pour PUBLIE, habitant pour HABITE, participant — acheteur ou vendeur — pour PARTICIPE, expéditeur pour ENVOIE) : ce n'est pas des entités séparées, juste la même table vue sous différents rôles contextuels — conforme au cahier des charges ("Utilisateur authentifié : peut agir comme acheteur ou vendeur selon le contexte").
 
 ### Associations et cardinalités
 
-- **UTILISATEUR (0,N) — CREE — (1,1) ANNONCE**
-  Un utilisateur (vendeur) crée plusieurs annonces, ou aucune ; une annonce est créée par un seul utilisateur.
+- **UTILISATEUR (0,N) — PUBLIE — (1,1) ANNONCE**
+  Un utilisateur (vendeur) publie plusieurs annonces, ou aucune ; une annonce est publiée par un seul utilisateur.
+  (Nommée CREE avant le MCD du 01/09/2026 ; renommée PUBLIE pour coller au [MCD.pdf](MCD.pdf) fourni.)
+
+- **UTILISATEUR (1,1) — HABITE — (0,N) CODE_POSTAL**
+  Un utilisateur habite à exactement un code postal ; un code postal est habité par plusieurs utilisateurs, ou aucun.
+  (Nouvelle association du MCD du 01/09/2026 : `code_postal` n'est plus un simple texte sur `UTILISATEUR`, voir note plus haut.)
 
 - **CATEGORIE (0,N) — APPARTIENT_A — (1,1) ANNONCE**
   Une catégorie classe plusieurs annonces (ou aucune) ; une annonce appartient à une seule catégorie.
@@ -105,8 +121,9 @@
 - **STATUT (0,N) — CONCERNE — (1,1) ANNONCE**
   Un statut concerne plusieurs annonces (ou aucune) ; une annonce a un seul statut.
 
-- **ANNONCE (0,N) — POSSEDE — (1,1) PHOTO**
-  Une annonce peut avoir plusieurs photos (ou aucune) ; chaque photo illustre une seule annonce.
+- **ANNONCE (1,N) — POSSEDE — (1,1) PHOTO**
+  Une annonce a une ou plusieurs photos (au moins une) ; chaque photo illustre une seule annonce.
+  (Cardinalité `ANNONCE` resserrée de `(0,N)` à `(1,N)` par le MCD du 01/09/2026 : une annonce sans aucune photo n'est plus autorisée.)
 
 - **ANNONCE (0,N) — CONTIENT — (1,1) CONVERSATION**
   Une annonce peut avoir plusieurs conversations (une par acheteur intéressé) ; chaque conversation concerne une seule annonce.
@@ -123,18 +140,20 @@
 ### Schéma Mocodo
 
 
-UTILISATEUR: _id_utilisateur, nom, prenom, email, mot_de_passe, code_postal
+UTILISATEUR: _id_utilisateur, nom, prenom, email, mot_de_passe
+CODE_POSTAL: _code_postal, ville, latitude, longitude
 CATEGORIE: _id_categorie, nom
 STATUT: _id_statut, nom
 ANNONCE: _id_annonce, titre, description, prix, date_publication, date_suppression
-PHOTO: _id_photo, url
+PHOTO: _id_photo, url, ordre
 CONVERSATION: _id_conversation, date_creation
-MESSAGE: _id_message, contenu, date_envoi
+MESSAGE: _id_message, contenu, date_envoi, lu
 
-CREE, 0N UTILISATEUR, 11 ANNONCE
+PUBLIE, 0N UTILISATEUR, 11 ANNONCE
+HABITE, 11 UTILISATEUR, 0N CODE_POSTAL
 APPARTIENT_A, 0N CATEGORIE, 11 ANNONCE
 CONCERNE, 0N STATUT, 11 ANNONCE
-POSSEDE, 0N ANNONCE, 11 PHOTO
+POSSEDE, 1N ANNONCE, 11 PHOTO
 CONTIENT, 0N ANNONCE, 11 CONVERSATION
 PARTICIPE, 0N UTILISATEUR, 1N CONVERSATION
 CONTENU, 1N CONVERSATION, 11 MESSAGE

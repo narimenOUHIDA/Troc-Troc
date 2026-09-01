@@ -15,6 +15,13 @@ Dérivé du [MCD](troctroc-user-stories-mcd.md), aligné sur le cahier des charg
   ⚠️ Ceci annule l'ajustement de la version initiale ci-dessus, qui supprimait cette table de jointure — à confirmer en équipe : sans elle, acheteur et vendeur étaient déjà identifiables (acheteur via `id_acheteur`, vendeur déduit via `ANNONCE.id_utilisateur`), donc `PARTICIPE` ajoute de la flexibilité (plusieurs participants) mais aussi une jointure en plus pour les cas simples.
 - **Statuts à confirmer** : le nouveau MCD donne "active, supprimée" comme exemples de valeurs pour `STATUT.nom`, mais le cahier des charges exige un état "vendu" (US21) — et `date_suppression` couvre déjà la suppression. À trancher en équipe : les valeurs réelles de `STATUT` (`disponible` / `vendu` semblent nécessaires ; `supprimée` fait peut-être doublon avec `date_suppression`).
 
+**Mise à jour du 01/09/2026** — suite au [MCD.pdf](MCD.pdf) déposé dans le dépôt :
+- **`CODE_POSTAL` créée en entité propre.** `code_postal` n'est plus un simple attribut texte sur `UTILISATEUR` : `UTILISATEUR` porte désormais `#code_postal` (FK, côté (1,1) de l'association `HABITE`), en référence à `CODE_POSTAL (_code_postal_, ville, latitude, longitude)`. Objectif : permettre un vrai calcul de distance (US07/US09, rayon de 50 km) via `latitude`/`longitude`, au lieu d'un simple filtre texte sur le code postal.
+- **`PHOTO.ordre` ajouté.** Position d'affichage de la photo dans la galerie d'une annonce (0 = photo principale, US11/US12).
+- **`MESSAGE.lu` ajouté.** Marque si le message a été lu par son destinataire (pastille de message non lu, US15 — voir [wireframes](troctroc-wireframes.md#éléments-transverses)).
+- **Association `UTILISATEUR`–`ANNONCE` renommée `CREE` → `PUBLIE`**, pour coller au libellé du MCD fourni. Aucun changement de cardinalité ni de clé.
+- **Cardinalité `ANNONCE` de `POSSEDE` resserrée de `(0,N)` à `(1,N)`** : une annonce doit désormais avoir au moins une photo (elle pouvait auparavant n'en avoir aucune). N'affecte pas le schéma de clés ci-dessous (la FK reste sur `PHOTO`), seulement la contrainte métier (validation applicative/formulaire de dépôt, US05/US06).
+
 Convention : `_souligné_` = clé primaire, `#` = clé étrangère.
 
 ```
@@ -22,24 +29,27 @@ STATUT (_id_statut_, nom)
 
 CATEGORIE (_id_categorie_, nom)
 
-UTILISATEUR (_id_utilisateur_, nom, prenom, email, mot_de_passe, code_postal)
+CODE_POSTAL (_code_postal_, ville, latitude, longitude)
+
+UTILISATEUR (_id_utilisateur_, nom, prenom, email, mot_de_passe, #code_postal)
 
 ANNONCE (_id_annonce_, titre, description, prix, date_publication, date_suppression, #id_utilisateur, #id_categorie, #id_statut)
 
-PHOTO (_id_photo_, url, #id_annonce)
+PHOTO (_id_photo_, url, ordre, #id_annonce)
 
 CONVERSATION (_id_conversation_, date_creation, #id_annonce)
 
 PARTICIPE (_#id_utilisateur_, _#id_conversation_)
 
-MESSAGE (_id_message_, contenu, date_envoi, #id_conversation, #id_expediteur)
+MESSAGE (_id_message_, contenu, date_envoi, lu, #id_conversation, #id_expediteur)
 ```
 
 ## Détail des clés étrangères
 
 | Table | Clé étrangère | Référence | Association d'origine | Rôle |
 |---|---|---|---|---|
-| ANNONCE | id_utilisateur | UTILISATEUR.id_utilisateur | CREE | vendeur |
+| UTILISATEUR | code_postal | CODE_POSTAL.code_postal | HABITE | — |
+| ANNONCE | id_utilisateur | UTILISATEUR.id_utilisateur | PUBLIE | vendeur |
 | ANNONCE | id_categorie | CATEGORIE.id_categorie | APPARTIENT_A | — |
 | ANNONCE | id_statut | STATUT.id_statut | CONCERNE | — |
 | PHOTO | id_annonce | ANNONCE.id_annonce | POSSEDE | — |

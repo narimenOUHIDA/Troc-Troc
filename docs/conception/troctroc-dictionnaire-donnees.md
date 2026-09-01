@@ -1,5 +1,6 @@
 # TrocTroc — Dictionnaire des données
 
+> Mis à jour le 01/09/2026 suite au [MCD.pdf](MCD.pdf) déposé dans le dépôt : ajout de `CODE_POSTAL` (`UTILISATEUR.code_postal` devient une FK plutôt qu'un simple texte), `PHOTO.ordre` et `MESSAGE.lu`. Détail dans [troctroc-mld.md](troctroc-mld.md#mise-à-jour-du-01092026).
 
 ### UTILISATEUR
 
@@ -10,7 +11,16 @@
 | prenom | varchar | 50 | oui | — | Prénom |
 | email | varchar | 255 | oui | unique, format email valide | Adresse email de connexion |
 | mot_de_passe | varchar | 255 | oui | stocké haché (ex. bcrypt) | Mot de passe de connexion |
-| code_postal | varchar | 5 | oui | 5 chiffres | Sert au calcul du rayon de 50 km |
+| code_postal | varchar | 5 | oui | FK → CODE_POSTAL.code_postal | Lieu d'habitation, sert au calcul du rayon de 50 km |
+
+### CODE_POSTAL
+
+| Attribut | Type | Taille/format | Obligatoire | Contraintes | Description |
+|---|---|---|---|---|---|
+| code_postal | varchar | 5 | oui | PK, 5 chiffres | Code postal (clé métier, pas d'auto-incrément) |
+| ville | varchar | 100 | oui | — | Nom de la ville associée au code postal |
+| latitude | décimal | 9,6 | oui | — | Latitude du centre de la commune, pour le calcul de distance |
+| longitude | décimal | 9,6 | oui | — | Longitude du centre de la commune, pour le calcul de distance |
 
 ### CATEGORIE
 
@@ -48,6 +58,7 @@
 |---|---|---|---|---|---|
 | id_photo | entier | — | oui | PK, auto-incrément | Identifiant unique de la photo |
 | url | varchar | 255 | oui | — | Chemin/URL de l'image stockée |
+| ordre | entier | — | oui | ≥ 0, défaut 0 | Position d'affichage dans la galerie (0 = photo principale) |
 | id_annonce | entier | — | oui | FK → ANNONCE.id_annonce | Annonce illustrée par cette photo |
 
 ### CONVERSATION
@@ -74,5 +85,6 @@ Les participants (acheteur et vendeur) sont rattachés à la conversation via `P
 | id_message | entier | — | oui | PK, auto-incrément | Identifiant unique du message |
 | contenu | text | — | oui | — | Texte du message |
 | date_envoi | datetime | — | oui | défaut = date/heure actuelle | Date et heure d'envoi du message |
+| lu | booléen | — | oui | défaut `false` | Indique si le destinataire a lu le message (pastille non lu, US15) |
 | id_conversation | entier | — | oui | FK → CONVERSATION.id_conversation | Conversation à laquelle appartient le message |
 | id_expediteur | entier | — | oui | FK → UTILISATEUR.id_utilisateur | Utilisateur (acheteur ou vendeur) ayant envoyé ce message |
