@@ -8,47 +8,7 @@
 
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
-
-	// Mêmes 8 catégories que l'accueil (voir +page.svelte de la racine).
-	const categoriesDisponibles = [
-		'Mobilier',
-		'Électroménager',
-		'Vêtements',
-		'Sport & Loisirs',
-		'Multimédia',
-		'Enfants & Bébé',
-		'Bricolage & Jardin',
-		'Véhicules'
-	];
-
-	// Données statiques en attendant GET /annonces (voir docs/conception/troctroc-endpoints.md).
-	// `statut` reflète ANNONCE.id_statut (dictionnaire des données) : 'disponible' | 'vendu'.
-	const toutesLesAnnonces = [
-		{ id: 1, titre: 'Vélo VTT 26 pouces', prix: 45, distanceKm: 3, categorie: 'Sport & Loisirs', statut: 'disponible' },
-		{ id: 2, titre: 'Vélo ville', prix: 90, distanceKm: 6, categorie: 'Sport & Loisirs', statut: 'vendu' },
-		{ id: 3, titre: 'Vélo électrique', prix: 380, distanceKm: 5, categorie: 'Sport & Loisirs', statut: 'disponible' },
-		{ id: 4, titre: 'Canapé 3 places', prix: 120, distanceKm: 6, categorie: 'Mobilier', statut: 'disponible' },
-		{ id: 5, titre: 'Table basse en bois', prix: 30, distanceKm: 9, categorie: 'Mobilier', statut: 'disponible' },
-		{ id: 6, titre: 'Chaise de bureau', prix: 40, distanceKm: 7, categorie: 'Mobilier', statut: 'vendu' },
-		{ id: 7, titre: 'Console de jeux', prix: 60, distanceKm: 5, categorie: 'Multimédia', statut: 'disponible' },
-		{ id: 8, titre: 'Téléviseur 40"', prix: 90, distanceKm: 12, categorie: 'Multimédia', statut: 'disponible' },
-		{ id: 9, titre: 'Enceinte bluetooth', prix: 20, distanceKm: 4, categorie: 'Multimédia', statut: 'disponible' },
-		{ id: 10, titre: 'Perceuse-visseuse', prix: 35, distanceKm: 4, categorie: 'Bricolage & Jardin', statut: 'disponible' },
-		{ id: 11, titre: 'Tondeuse à gazon', prix: 75, distanceKm: 14, categorie: 'Bricolage & Jardin', statut: 'disponible' },
-		{ id: 12, titre: 'Établi', prix: 55, distanceKm: 11, categorie: 'Bricolage & Jardin', statut: 'vendu' },
-		{ id: 13, titre: 'Manteau hiver', prix: 25, distanceKm: 2, categorie: 'Vêtements', statut: 'disponible' },
-		{ id: 14, titre: 'Paire de baskets', prix: 15, distanceKm: 3, categorie: 'Vêtements', statut: 'disponible' },
-		{ id: 15, titre: 'Robe de soirée', prix: 35, distanceKm: 8, categorie: 'Vêtements', statut: 'disponible' },
-		{ id: 16, titre: 'Poussette', prix: 55, distanceKm: 8, categorie: 'Enfants & Bébé', statut: 'disponible' },
-		{ id: 17, titre: 'Lit bébé évolutif', prix: 65, distanceKm: 10, categorie: 'Enfants & Bébé', statut: 'disponible' },
-		{ id: 18, titre: 'Trotteur', prix: 18, distanceKm: 6, categorie: 'Enfants & Bébé', statut: 'vendu' },
-		{ id: 19, titre: 'Réfrigérateur', prix: 150, distanceKm: 13, categorie: 'Électroménager', statut: 'disponible' },
-		{ id: 20, titre: 'Micro-ondes', prix: 25, distanceKm: 5, categorie: 'Électroménager', statut: 'disponible' },
-		{ id: 21, titre: 'Aspirateur', prix: 40, distanceKm: 7, categorie: 'Électroménager', statut: 'disponible' },
-		{ id: 22, titre: 'Trottinette électrique', prix: 180, distanceKm: 9, categorie: 'Véhicules', statut: 'disponible' },
-		{ id: 23, titre: 'Remorque vélo', prix: 60, distanceKm: 15, categorie: 'Véhicules', statut: 'disponible' },
-		{ id: 24, titre: 'Casque moto', prix: 45, distanceKm: 5, categorie: 'Véhicules', statut: 'vendu' }
-	];
+	import { categories as categoriesDisponibles, annonces as toutesLesAnnonces } from '$lib/annonces.js';
 
 	// Filtres pré-remplis depuis l'URL (tuile catégorie de l'accueil, ou recherche mots-clés/code postal).
 	const categorieUrl = page.url.searchParams.get('categorie');

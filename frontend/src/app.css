@@ -260,6 +260,34 @@ button.button-primary {
 	margin-bottom: 0.75rem;
 }
 
+/* Détail d'une annonce (/annonces/[id]) : conteneur pour la galerie + colonne d'infos, et grille des
+   4 vignettes. Nécessaire (pas juste esthétique) : sans lui .annonce-photo (aspect-ratio 4/3) s'étire
+   sur toute la largeur de la page et explose en hauteur. Le reste de la page (fil d'Ariane, colonne
+   d'infos, encart vendeur) reste volontairement en HTML brut, comme /annonces. */
+.annonce-detail {
+	display: grid;
+	gap: 2rem;
+	padding: 1rem 1.5rem 2rem;
+	max-width: 72rem;
+	margin: 0 auto;
+}
+
+.annonce-vignettes {
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 0.5rem;
+}
+
+@media (min-width: 60rem) {
+	.annonce-detail {
+		grid-template-columns: 2fr 1fr;
+		align-items: start;
+	}
+}
+
 .site-footer {
 	display: flex;
 	justify-content: space-between;

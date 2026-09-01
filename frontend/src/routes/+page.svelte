@@ -2,32 +2,14 @@
 	// Écran 1/9 des wireframes : Accueil (US01) — voir docs/conception/troctroc-wireframes.md §1.1
 
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
+	import { categories, trouverAnnonce } from '$lib/annonces.js';
 
 	// Données statiques en attendant le backend : GET /categories et GET /annonces n'existent pas encore
-	// (voir docs/conception/troctroc-endpoints.md). Formes alignées sur le dictionnaire des données
-	// (CATEGORIE.nom, ANNONCE.titre/prix) pour limiter les changements quand on branchera `api.js`.
-	// `distanceKm` n'existe pas en base : elle serait calculée côté API à partir du code postal de l'utilisateur.
-	const categories = [
-		'Mobilier',
-		'Électroménager',
-		'Vêtements',
-		'Sport & Loisirs',
-		'Multimédia',
-		'Enfants & Bébé',
-		'Bricolage & Jardin',
-		'Véhicules'
-	];
-
-	const dernieresAnnonces = [
-		{ id: 1, titre: 'Vélo VTT 26 pouces', prix: 45, distanceKm: 3 },
-		{ id: 2, titre: 'Canapé 3 places', prix: 120, distanceKm: 6 },
-		{ id: 3, titre: 'Console de jeux', prix: 60, distanceKm: 5 },
-		{ id: 4, titre: 'Table basse en bois', prix: 30, distanceKm: 9 },
-		{ id: 5, titre: 'Perceuse-visseuse', prix: 35, distanceKm: 4 },
-		{ id: 6, titre: 'Chaise de bureau', prix: 40, distanceKm: 7 },
-		{ id: 7, titre: 'Manteau hiver', prix: 25, distanceKm: 2 },
-		{ id: 8, titre: 'Poussette', prix: 55, distanceKm: 8 }
-	];
+	// (voir docs/conception/troctroc-endpoints.md). Le catalogue complet vit dans $lib/annonces.js,
+	// partagé avec /annonces et /annonces/[id] pour que les mêmes id renvoient à la même annonce partout.
+	// Sélection des 8 mêmes annonces qu'avant la centralisation (diversité des catégories affichées).
+	const idsDernieresAnnonces = [1, 4, 7, 5, 10, 6, 13, 16];
+	const dernieresAnnonces = idsDernieresAnnonces.map((id) => trouverAnnonce(id));
 
 	// Champs du formulaire de recherche du bloc d'accroche (hero), liés avec bind:value.
 	let recherche = $state('');
