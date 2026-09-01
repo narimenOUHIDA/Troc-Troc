@@ -7,6 +7,7 @@
 	// garder les mêmes cartes ; fil d'Ariane, filtres, tri et pagination restent en HTML brut.
 
 	import { page } from '$app/state';
+	import ThemeToggle from '$lib/ThemeToggle.svelte';
 
 	// Mêmes 8 catégories que l'accueil (voir +page.svelte de la racine).
 	const categoriesDisponibles = [
@@ -134,6 +135,7 @@
 	</nav>
 
 	<div class="header-auth">
+		<ThemeToggle />
 		<a href="/connexion">Connexion</a>
 		<a class="button-primary" href="/inscription">S'inscrire</a>
 	</div>

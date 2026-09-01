@@ -1,6 +1,8 @@
 <script>
 	// Écran 1/9 des wireframes : Accueil (US01) — voir docs/conception/troctroc-wireframes.md §1.1
 
+	import ThemeToggle from '$lib/ThemeToggle.svelte';
+
 	// Données statiques en attendant le backend : GET /categories et GET /annonces n'existent pas encore
 	// (voir docs/conception/troctroc-endpoints.md). Formes alignées sur le dictionnaire des données
 	// (CATEGORIE.nom, ANNONCE.titre/prix) pour limiter les changements quand on branchera `api.js`.
@@ -82,6 +84,7 @@
 	</nav>
 
 	<div class="header-auth">
+		<ThemeToggle />
 		<a href="/connexion">Connexion</a>
 		<a class="button-primary" href="/inscription">S'inscrire</a>
 	</div>

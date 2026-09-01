@@ -1,6 +1,8 @@
 <script>
 	// Écran 5/9 des wireframes : Inscription (US02) — voir docs/conception/troctroc-wireframes.md §2.2
 
+	import ThemeToggle from '$lib/ThemeToggle.svelte';
+
 	// Prénom/nom séparés ici, alors que le wireframe ASCII montre un seul champ "Nom complet" :
 	// on suit plutôt le dictionnaire des données (UTILISATEUR.nom / UTILISATEUR.prenom, deux colonnes
 	// distinctes). Un champ unique obligerait à re-découper la saisie côté serveur, peu fiable
@@ -44,6 +46,7 @@
      (voir §Éléments transverses du wireframe). -->
 <header class="auth-header">
 	<a class="logo" href="/">TT TrocTroc</a>
+	<ThemeToggle />
 </header>
 
 <main class="auth-main">

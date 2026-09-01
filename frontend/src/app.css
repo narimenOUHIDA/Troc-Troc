@@ -1,11 +1,55 @@
 /* Charte graphique v1 (docs/conception/troctroc-sprint0-slides.html, slide "Charte graphique") :
    fond sombre, texte clair, vert "Confiance" pour les actions, doré "Repère" pour les mises en avant.
-   Version 1, à affiner en Sprint 1. */
+   Version 1, à affiner en Sprint 1.
+
+   Thème clair/sombre : le mode sombre ci-dessous reste la valeur par défaut (charte v1 d'origine).
+   Le mode clair s'applique soit automatiquement via prefers-color-scheme, soit explicitement via
+   [data-theme] posé sur <html> par ThemeToggle.svelte (bouton slide dans l'en-tête). --color-overlay-rgb
+   factorise les bordures/fonds translucides (rgba(var(--color-overlay-rgb), X)) qui reprenaient sinon
+   la teinte du texte en dur (236, 238, 231) : elle s'inverse avec le thème pour rester lisible. */
 :root {
 	--color-fond: #0f1b24;
 	--color-papier: #eceee7;
+	--color-surface: #152535;
 	--color-confiance: #4fa894;
 	--color-repere: #e0a63c;
+	--color-overlay-rgb: 236, 238, 231;
+	/* Texte posé sur un fond --color-confiance (bouton principal) : toujours sombre, indépendamment
+	   du thème, car le vert confiance reste assez clair dans les deux palettes. */
+	--color-sur-accent: #0f1b24;
+	color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) {
+		--color-fond: #eceee7;
+		--color-papier: #14232d;
+		--color-surface: #dcdfd6;
+		--color-confiance: #2f7d69;
+		--color-repere: #a3690f;
+		--color-overlay-rgb: 20, 35, 45;
+		color-scheme: light;
+	}
+}
+
+:root[data-theme='light'] {
+	--color-fond: #eceee7;
+	--color-papier: #14232d;
+	--color-surface: #dcdfd6;
+	--color-confiance: #2f7d69;
+	--color-repere: #a3690f;
+	--color-overlay-rgb: 20, 35, 45;
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	--color-fond: #0f1b24;
+	--color-papier: #eceee7;
+	--color-surface: #152535;
+	--color-confiance: #4fa894;
+	--color-repere: #e0a63c;
+	--color-overlay-rgb: 236, 238, 231;
+	color-scheme: dark;
 }
 
 *,
@@ -22,6 +66,9 @@ body {
 		sans-serif;
 	background: var(--color-fond);
 	color: var(--color-papier);
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
 }
 
 /* Mobile-first : sur petit écran le header s'empile en 3 lignes (logo+auth / recherche / nav) via
@@ -33,7 +80,7 @@ body {
 	align-items: center;
 	gap: 0.75rem 1.5rem;
 	padding: 1rem 1.5rem;
-	border-bottom: 1px solid rgba(236, 238, 231, 0.15);
+	border-bottom: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 }
 
 .logo {
@@ -52,9 +99,9 @@ body {
 	width: 100%;
 	max-width: none;
 	padding: 0.5rem 0.75rem;
-	border: 1px solid rgba(236, 238, 231, 0.25);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
 	border-radius: 0.375rem;
-	background: rgba(236, 238, 231, 0.05);
+	background: rgba(var(--color-overlay-rgb), 0.05);
 	color: var(--color-papier);
 }
 
@@ -83,7 +130,7 @@ body {
 
 .button-primary {
 	background: var(--color-confiance);
-	color: var(--color-fond) !important;
+	color: var(--color-sur-accent) !important;
 	padding: 0.5rem 1rem;
 	border-radius: 0.375rem;
 }
@@ -99,7 +146,7 @@ button.button-primary {
 .hero {
 	text-align: center;
 	padding: 3rem 1.5rem;
-	background: #152535;
+	background: var(--color-surface);
 }
 
 .hero h1 {
@@ -118,9 +165,9 @@ button.button-primary {
 .hero-search input {
 	width: 100%;
 	padding: 0.6rem 0.9rem;
-	border: 1px solid rgba(236, 238, 231, 0.25);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
 	border-radius: 0.375rem;
-	background: rgba(236, 238, 231, 0.05);
+	background: rgba(var(--color-overlay-rgb), 0.05);
 	color: var(--color-papier);
 }
 
@@ -129,7 +176,7 @@ button.button-primary {
 	border: none;
 	border-radius: 0.375rem;
 	background: var(--color-confiance);
-	color: var(--color-fond);
+	color: var(--color-sur-accent);
 	cursor: pointer;
 }
 
@@ -158,7 +205,7 @@ button.button-primary {
 	display: block;
 	padding: 0.75rem 1rem;
 	text-align: center;
-	border: 1px solid rgba(236, 238, 231, 0.15);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 	border-radius: 0.5rem;
 	text-decoration: none;
 	color: inherit;
@@ -177,18 +224,18 @@ button.button-primary {
 	display: block;
 	text-decoration: none;
 	color: inherit;
-	border: 1px solid rgba(236, 238, 231, 0.15);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 	border-radius: 0.5rem;
 	overflow: hidden;
 }
 
 .annonce-photo {
 	aspect-ratio: 4 / 3;
-	background: rgba(236, 238, 231, 0.08);
+	background: rgba(var(--color-overlay-rgb), 0.08);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: rgba(236, 238, 231, 0.5);
+	color: rgba(var(--color-overlay-rgb), 0.5);
 	font-size: 0.875rem;
 }
 
@@ -208,7 +255,7 @@ button.button-primary {
 }
 
 .annonce-distance {
-	color: rgba(236, 238, 231, 0.6);
+	color: rgba(var(--color-overlay-rgb), 0.6);
 	font-size: 0.875rem;
 	margin-bottom: 0.75rem;
 }
@@ -220,7 +267,7 @@ button.button-primary {
 	flex-wrap: wrap;
 	gap: 0.75rem;
 	padding: 1.5rem;
-	border-top: 1px solid rgba(236, 238, 231, 0.15);
+	border-top: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 }
 
 .site-footer p {
@@ -241,10 +288,22 @@ button.button-primary {
    cf. §Éléments transverses du wireframe. Empilage vertical mobile-first natif ici : la carte est
    déjà en colonne (display:flex column) et en width:100% jusqu'à sa max-width, donc pas besoin
    de media query dédiée pour ce bloc. */
+/* Grille à 3 colonnes plutôt qu'un simple flex centré : garde le logo visuellement centré
+   (colonne du milieu) tout en réservant la colonne de droite pour ThemeToggle. */
 .auth-header {
-	display: flex;
-	justify-content: center;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
 	padding: 1.5rem;
+}
+
+.auth-header .logo {
+	grid-column: 2;
+}
+
+.auth-header .theme-toggle {
+	grid-column: 3;
+	justify-self: end;
 }
 
 .auth-main {
@@ -262,8 +321,8 @@ button.button-primary {
 	flex-direction: column;
 	gap: 1rem;
 	padding: 1.5rem;
-	background: #152535;
-	border: 1px solid rgba(236, 238, 231, 0.15);
+	background: var(--color-surface);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 	border-radius: 0.75rem;
 }
 
@@ -284,16 +343,16 @@ button.button-primary {
 .auth-card input[type='email'],
 .auth-card input[type='password'] {
 	padding: 0.6rem 0.75rem;
-	border: 1px solid rgba(236, 238, 231, 0.25);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
 	border-radius: 0.375rem;
-	background: rgba(236, 238, 231, 0.05);
+	background: rgba(var(--color-overlay-rgb), 0.05);
 	color: var(--color-papier);
 	font: inherit;
 }
 
 .auth-card .hint {
 	font-size: 0.8rem;
-	color: rgba(236, 238, 231, 0.6);
+	color: rgba(var(--color-overlay-rgb), 0.6);
 }
 
 .auth-card .checkbox {
@@ -332,7 +391,7 @@ button.button-primary {
 }
 
 .auth-back {
-	color: rgba(236, 238, 231, 0.7);
+	color: rgba(var(--color-overlay-rgb), 0.7);
 	text-decoration: none;
 	font-size: 0.9rem;
 }
@@ -379,4 +438,48 @@ button.button-primary {
 	.hero-search input[name='codePostal'] {
 		width: 8rem;
 	}
+}
+
+/* Bouton slide clair/sombre (ThemeToggle.svelte). `role="switch"` + `aria-checked` côté composant ;
+   c'est l'attribut aria-checked (pas une classe) qui pilote la position du curseur ici, pour rester
+   la seule source de vérité avec le DOM accessible plutôt que de la dupliquer dans une classe CSS. */
+.theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: inherit;
+}
+
+.theme-toggle-track {
+	position: relative;
+	width: 3rem;
+	height: 1.6rem;
+	border-radius: 999px;
+	background: rgba(var(--color-overlay-rgb), 0.12);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	transition: background-color 0.15s ease;
+}
+
+.theme-toggle-thumb {
+	position: absolute;
+	top: 0.15rem;
+	left: 0.15rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.15rem;
+	height: 1.15rem;
+	border-radius: 50%;
+	background: var(--color-confiance);
+	font-size: 0.7rem;
+	line-height: 1;
+	transition: transform 0.15s ease;
+}
+
+.theme-toggle[aria-checked='true'] .theme-toggle-thumb {
+	transform: translateX(1.4rem);
 }
