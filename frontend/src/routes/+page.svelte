@@ -4,6 +4,7 @@
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories, trouverAnnonce } from '$lib/annonces.js';
 	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
+	import logo from '$lib/assets/logo-mobile.png';
 
 	// Données statiques en attendant le backend : GET /categories et GET /annonces n'existent pas encore
 	// (voir docs/conception/troctroc-endpoints.md). Le catalogue complet vit dans $lib/annonces.js,
@@ -50,7 +51,7 @@
      Les variantes "connecté" et "minimal" (voir §Éléments transverses du wireframe) arriveront avec les
      pages Dépôt/Espace personnel et Connexion/Inscription. -->
 <header class="site-header">
-	<a class="logo" href="/">TT TrocTroc</a>
+	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
 
 	<form class="header-search" role="search" onsubmit={onRechercherHeader}>
 		<input

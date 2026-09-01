@@ -17,6 +17,10 @@
 	/* Texte posé sur un fond --color-confiance (bouton principal) : toujours sombre, indépendamment
 	   du thème, car le vert confiance reste assez clair dans les deux palettes. */
 	--color-sur-accent: #0f1b24;
+	/* Fond fixe (indépendant du thème) sous le logo image (logo-mobile.png) : ses couleurs (vert très
+	   foncé + vert moyen) sont conçues pour un fond clair et deviendraient illisibles sur l'en-tête du
+	   thème sombre sans cette pastille claire constante. */
+	--color-logo-fond: #eceee7;
 	color-scheme: dark;
 }
 
@@ -85,9 +89,19 @@ body {
 
 .logo {
 	order: 1;
-	font-weight: 700;
+	display: inline-flex;
+	align-items: center;
 	text-decoration: none;
 	color: inherit;
+	background: var(--color-logo-fond);
+	padding: 0.35rem 0.75rem;
+	border-radius: 0.5rem;
+}
+
+.logo img {
+	display: block;
+	height: 1.5rem;
+	width: auto;
 }
 
 .header-search {

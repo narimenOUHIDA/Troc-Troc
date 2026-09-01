@@ -10,6 +10,7 @@
 	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
+	import logo from '$lib/assets/logo-mobile.png';
 
 	// $derived (pas juste lu une fois) : reste correct si on navigue d'une annonce à une autre sans
 	// démonter le composant (ex. clic sur une annonce similaire, SvelteKit réutilise la même page).
@@ -41,7 +42,7 @@
 </svelte:head>
 
 <header class="site-header">
-	<a class="logo" href="/">TT TrocTroc</a>
+	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
 
 	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
 		<input type="search" name="q" placeholder="Rechercher un article..." aria-label="Rechercher un article" />
