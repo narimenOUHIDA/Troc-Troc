@@ -3,6 +3,7 @@
 
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories, trouverAnnonce } from '$lib/annonces.js';
+	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
 
 	// Données statiques en attendant le backend : GET /categories et GET /annonces n'existent pas encore
 	// (voir docs/conception/troctroc-endpoints.md). Le catalogue complet vit dans $lib/annonces.js,
@@ -118,7 +119,7 @@
 			{#each dernieresAnnonces as annonce (annonce.id)}
 				<li class="annonce-card">
 					<a href="/annonces/{annonce.id}">
-						<div class="annonce-photo" aria-hidden="true">photo</div>
+						<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
 						<p class="annonce-titre">{annonce.titre}</p>
 						<p class="annonce-prix">{annonce.prix} €</p>
 						<p class="annonce-distance">{annonce.distanceKm} km</p>

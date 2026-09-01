@@ -9,6 +9,7 @@
 	import { page } from '$app/state';
 	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
+	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
 
 	// $derived (pas juste lu une fois) : reste correct si on navigue d'une annonce à une autre sans
 	// démonter le composant (ex. clic sur une annonce similaire, SvelteKit réutilise la même page).
@@ -71,11 +72,11 @@
 		<div class="annonce-detail">
 			<!-- Colonne gauche : galerie (photo principale + vignettes) et description. -->
 			<section aria-label="Photos de l'annonce">
-				<div class="annonce-photo" aria-hidden="true">photo principale</div>
+				<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
 
 				<ul class="annonce-vignettes">
 					{#each Array(4) as _, i (i)}
-						<li class="annonce-photo" aria-hidden="true">photo {i + 1}</li>
+						<li class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></li>
 					{/each}
 				</ul>
 
@@ -118,7 +119,7 @@
 					{#each similaires as annonceSimilaire (annonceSimilaire.id)}
 						<li class="annonce-card">
 							<a href="/annonces/{annonceSimilaire.id}">
-								<div class="annonce-photo" aria-hidden="true">photo</div>
+								<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
 								<p class="annonce-titre">{annonceSimilaire.titre}</p>
 								<p class="annonce-prix">{annonceSimilaire.prix} €</p>
 								<p class="annonce-distance">{annonceSimilaire.distanceKm} km</p>

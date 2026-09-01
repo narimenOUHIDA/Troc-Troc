@@ -9,6 +9,7 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories as categoriesDisponibles, annonces as toutesLesAnnonces } from '$lib/annonces.js';
+	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
 
 	// Filtres pré-remplis depuis l'URL (tuile catégorie de l'accueil, ou recherche mots-clés/code postal).
 	const categorieUrl = page.url.searchParams.get('categorie');
@@ -181,9 +182,9 @@
 						<li class="annonce-card">
 							<a href="/annonces/{annonce.id}">
 								<div class="annonce-photo" aria-hidden="true">
-									photo
+									<img src={photoPlaceholder} alt="" />
 									{#if annonce.statut === 'vendu'}
-										<span>VENDU</span>
+										<span class="annonce-badge-vendu">VENDU</span>
 									{/if}
 								</div>
 								<p class="annonce-titre">{annonce.titre}</p>
