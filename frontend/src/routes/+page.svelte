@@ -116,24 +116,34 @@
       color:#333;
     }
 
+      /* Conteneur de la barre de Recherche : occupe tout l'espace au centre*/
+    .search-bar {
+      flex: 1;                                 /* Prend tout l'espace disponible entre le logo et les boutons */
+      max-width: 500px;                        /* Limite la largeur max pour ne pas qu'elle soit géante  */
+    }
 
-     /* Conteneur de la barre de Recherche : occupe tout l'espace au centre*/
+
+      /*Champ saisie (input) */
     .search-bar input {
-      width: 100%;
+      width: 100%;                              /* remplit 100% de son conteneur .search-bar */
       padding: 8px 12px;
-      border-radius: 4px;
+      border-radius: 4px;                        /*Coins légèrement arrondis */
       border: 1px solid #ccc;
     }
 
+
+       /*Bloc des boutons Utilisateur (à droite) */
     .user-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 12px;                                 /* Espcace entre le bouton d'ajout et le lien de connexion */
     }
 
+
+     /* bouton d'action principal "+ Deposer une annonce" (Call to action )*/
     .btn-add {
 
-      background-color: #2563eb;
+      background-color: #2563eb;              /*  bleau voyant pour inciter au clic */
       color:white;
       padding: 8px 14px;
       border-radius: 4px;
@@ -141,49 +151,58 @@
       font-size: 0.9rem;
     }
 
+
+     /* Lien de connexion / inscription (moins voyant que le bouton d'action) */
     .link-auth{
       color: #4b5563;
       text-decoration: none;
       font-size : 0.9rem;
     }
 
+     /* Bannière de présentation (Hero Banner) : texte centré sur fond gris clair */
     .hero-banner {
-      background-color :#f3f4f6;
+      background-color :#f3f4f6;               /*fond gris clair pour faire ressortir le bloc */
       padding: 30px;
       text-align: center;
       border-radius: 8px;
-      margin: 20px 0;
+      margin: 20px 0;                             /* Espacement avec le header et la section suivante */
     }
 
+     /* Titre de la bannière : taille plus grande et marge inférieure */
     .hero-banner h1 {
-      margin: 0 0 10px 0 ;
+      margin: 0 0 10px 0 ;                         /* Nettoie les marges par défaut des titres h1 */
       font-size: 1.6rem;
     }
 
+     /*Espacement standard pour chaque grande section de la page  */
     .block-section {
       margin-bottom: 30px;
     }
 
+     /* Style des titres de section  ( Categories , Dernières annonces )*/
     .block-section h2 {
       font-size: 1.2rem;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;               /*Soulignement léger sous chaque titre */
       padding-bottom: 5px;
       margin-bottom: 15px;
     }
 
+     /* Grille des catégories : utilise CSS Grid pour un affichage flexible et responsive */
     .categories-grid {
       display:grid;
+       /* Utilisation de repeat(auto-fill, minmax()) pour créer autant de colonnes que possible avec une largeur minimale de 100px et une largeur maximale de 1 fraction de l'espace disponible */
       grid-template-columns: repeat( auto-fill, minmax(100px, 1fr));
       gap: 12px;
     }
 
+     /* Carte individuelle d'une catégorie */
     .category-item {
       border: 1px solid #e5e7eb;
       border-radius: 6px;
       padding: 12px;
       text-align : center;
       background:#fff;
-      cursor: pointer;
+      cursor: pointer;                           /* Curseur sous forme de main pour indiquer que c'est clicable */
     }
 
     .category-item .icon {
