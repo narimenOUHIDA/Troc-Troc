@@ -97,7 +97,7 @@
 				maxlength="5"
 				bind:value={codePostal}
 			/>
-			<button type="submit">Rechercher</button>
+			<button type="submit" class="button-primary">Rechercher</button>
 		</form>
 	</section>
 
@@ -120,7 +120,13 @@
 			{#each dernieresAnnonces as annonce (annonce.id)}
 				<li class="annonce-card">
 					<a href="/annonces/{annonce.id}">
-						<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
+						<div class="annonce-photo" aria-hidden="true">
+							<img src={photoPlaceholder} alt="" />
+							<span class="annonce-badge-categorie">{annonce.categorie}</span>
+							{#if annonce.statut === 'vendu'}
+								<span class="annonce-badge-vendu">VENDU</span>
+							{/if}
+						</div>
 						<p class="annonce-titre">{annonce.titre}</p>
 						<p class="annonce-prix">{annonce.prix} €</p>
 						<p class="annonce-distance">{annonce.distanceKm} km</p>

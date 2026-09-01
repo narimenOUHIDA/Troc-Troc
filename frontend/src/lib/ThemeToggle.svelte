@@ -6,19 +6,20 @@
 
 	import { onMount } from 'svelte';
 
-	let theme = $state('dark');
+	// Clair par défaut (charte graphique, docs/conception/charte (1).pdf), sombre en extension.
+	let theme = $state('light');
 
 	onMount(() => {
 		// Reflète l'état déjà posé par le script anti-flash de app.html (ou, à défaut, le thème
-		// système via prefers-color-scheme, que data-theme ne porte pas explicitement).
+		// système via prefers-color-scheme, que data-theme ne porte pas explicitement — voir app.css).
 		theme =
 			document.documentElement.dataset.theme === 'light'
 				? 'light'
 				: document.documentElement.dataset.theme === 'dark'
 					? 'dark'
-					: window.matchMedia('(prefers-color-scheme: light)').matches
-						? 'light'
-						: 'dark';
+					: window.matchMedia('(prefers-color-scheme: dark)').matches
+						? 'dark'
+						: 'light';
 	});
 
 	function basculerTheme() {

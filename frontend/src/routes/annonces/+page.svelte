@@ -184,6 +184,7 @@
 							<a href="/annonces/{annonce.id}">
 								<div class="annonce-photo" aria-hidden="true">
 									<img src={photoPlaceholder} alt="" />
+									<span class="annonce-badge-categorie">{annonce.categorie}</span>
 									{#if annonce.statut === 'vendu'}
 										<span class="annonce-badge-vendu">VENDU</span>
 									{/if}

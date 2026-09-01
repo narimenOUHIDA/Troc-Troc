@@ -120,7 +120,13 @@
 					{#each similaires as annonceSimilaire (annonceSimilaire.id)}
 						<li class="annonce-card">
 							<a href="/annonces/{annonceSimilaire.id}">
-								<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
+								<div class="annonce-photo" aria-hidden="true">
+									<img src={photoPlaceholder} alt="" />
+									<span class="annonce-badge-categorie">{annonceSimilaire.categorie}</span>
+									{#if annonceSimilaire.statut === 'vendu'}
+										<span class="annonce-badge-vendu">VENDU</span>
+									{/if}
+								</div>
 								<p class="annonce-titre">{annonceSimilaire.titre}</p>
 								<p class="annonce-prix">{annonceSimilaire.prix} €</p>
 								<p class="annonce-distance">{annonceSimilaire.distanceKm} km</p>
