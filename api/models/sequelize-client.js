@@ -5,17 +5,27 @@ import { Sequelize } from "sequelize";
 import "dotenv/config";
 
 // On récupère la string DATABASE_URL écrite dans le .env
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  // define configure le comportement par défaut de Sequelize
-  define: {
-    // Une convention pour que Sequelize ne mette pas les noms de table au pluriel
-    freezeTableName: true,
-    // Ajoute les colonnes createdAt et updatedAt à chaque table
-    timestamps: false,
-    // Utilise le snake_case pour les champs auto-générés (createdAt -> created_at)
-    underscored: true,
+const sequelize = new Sequelize(
+  
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+  {
+
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "postgres",
+    // define configure le comportement par défaut de Sequelize
+    define: {
+      // Une convention pour que Sequelize ne mette pas les noms de table au pluriel
+      freezeTableName: true,
+      // Ajoute les colonnes createdAt et updatedAt à chaque table
+      timestamps: false,
+      // Utilise le snake_case pour les champs auto-générés (createdAt -> created_at)
+      underscored: true,
+    },
   },
-});
+);
 
 try {
   await sequelize.authenticate();

@@ -1,9 +1,22 @@
+
+| Singulier      | Pluriel         |
+| -------------- | --------------- |
+| `Category`     | `Categories`    |
+| `Status`       | `Statuses`      |
+| `PostalCode`   | `PostalCodes`   |
+| `User`         | `Users`         |
+| `Listing`      | `Listings`      |
+| `Photo`        | `Photos`        |
+| `Conversation` | `Conversations` |
+| `Message`      | `Messages`      |
+| `Participant`  | `Participants`  |
+
 // seed.js
 import sequelize from "../models/sequelize-client.js";
-import { List, Card, Tag, User, Role } from "../models/index.js";
+import { Category, Conversation, Listing, Message, Participant, Photo, PostalCode, Status, User } from "../models/index.js";
 import argon2 from "argon2";
 
-// Impor∏t des json pour seed la BDD
+// Import des json pour seed la BDD
 import data from "./dataset.json" with { type: "json" };
 
 async function seed() {
@@ -15,21 +28,18 @@ async function seed() {
 
     // 2. On envoie les datas en BDD
     // ⚠️ On doit toujours seeder les tables SANS relations AVANT les tables AVEC relations. Sinon, vous allez créer des problèmes dans les insertions de données qui ne pourront pas être faite, du fait de la non précense des id nécessaires pour les relations.
-    // Country
-    console.log("Seeding Lists...");
+    // Category
+    console.log("Seeding Category...");
     // On utilise la méthode "bulkCreate" de notre modèle qui permet d'insérer plusieurs lignes en BDD en simultané.
-    const lists = await List.bulkCreate(data.lists, { returning: true });
-    // Cards
-    console.log("Seeding Cards...");
-    const cards = await Card.bulkCreate(data.cards, { returning: true });
+    const categories = await Category.bulkCreate(data.categories, { returning: true });
 
-    // Tags
-    console.log("Seeding Tags...");
-    const tags = await Tag.bulkCreate(data.tags, { returning: true });
+    // Status
+    console.log("Seeding Status...");
+    const statuses = await Status.bulkCreate(data.statuses, { returning: true });
 
-    // Roles
-    console.log("Seeding Roles...");
-    const roles = await Role.bulkCreate(data.roles, { returning: true });
+    // PostalCode
+    console.log("Seeding PostalCode...");
+    const postalCodes = await PostalCode.bulkCreate(data.postalCodes, { returning: true });
 
     // Users 
     console.log("Seeding Users...");
@@ -41,6 +51,10 @@ async function seed() {
       // on utiliser la modèle sequelize User et sa méthode static create pour insérer user dans la BDD
       await User.create(userJson);
     }
+
+    // Listing
+    console.log("Seeding Listing...");
+    const listings = await Listing.bulkCreate(data.listings, { returning: true });
 
     let myUser;
     let myRole;

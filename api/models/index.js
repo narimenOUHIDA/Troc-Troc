@@ -1,14 +1,12 @@
-import Category from "./Category";
-import Conversation from "./Conversation";
-import Listing from "./Listing";
-import Message from "./Message";
-import Participant from "./Participant";
-import Photo from "./Photo";
-import PostalCode from "./PostalCode";
-import Status from "./Status";
-import User from "./User";
-
-
+import Category from "./Category.js";
+import Conversation from "./Conversation.js";
+import Listing from "./Listing.js";
+import Message from "./Message.js";
+import Participant from "./Participant.js";
+import Photo from "./Photo.js";
+import PostalCode from "./PostalCode.js";
+import Status from "./Status.js";
+import User from "./User.js";
 
 // Listing & Category
 
