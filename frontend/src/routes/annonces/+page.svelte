@@ -94,6 +94,7 @@
 
 	<nav class="header-nav" aria-label="Navigation principale">
 		<a href="/categories">Catégories</a>
+		<a href="/deposer">Déposer une annonce</a>
 	</nav>
 
 	<div class="header-auth">
