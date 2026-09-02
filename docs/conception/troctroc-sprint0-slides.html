@@ -1,0 +1,783 @@
+<title>TrocTroc Sprint 0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0F1B24;
+    --ink-2:#152535;
+    --ink-3:#1C3040;
+    --line: rgba(143,163,174,0.30);
+    --line-strong: rgba(143,163,174,0.50);
+    --paper:#ECEEE7;
+    --paper-dim:#B9C4C2;
+    --muted:#7E96A1;
+    --accent:#4FA894;
+    --accent-soft: rgba(79,168,148,0.16);
+    --amber:#E0A63C;
+    --amber-soft: rgba(224,166,60,0.16);
+
+    --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+    --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; padding:0; }
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,p,ul,ol{ margin:0; }
+  ul{ padding:0; list-style:none; }
+
+  ::selection{ background:var(--accent); color:var(--ink); }
+
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:2px; }
+
+  .stage{
+    position:relative;
+    height:100dvh;
+    min-height:480px;
+    width:100%;
+    overflow:hidden;
+  }
+
+  .grid-bg{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, var(--line-strong) 0 1px, transparent 1px 480px),
+      repeating-linear-gradient(90deg, var(--line-strong) 0 1px, transparent 1px 480px);
+    opacity:0.22;
+  }
+  .stage::after{
+    content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background: radial-gradient(ellipse 60% 45% at 50% 12%, var(--accent-soft), transparent 65%);
+  }
+
+  .progress-rail{
+    position:absolute; top:0; left:0; right:0; height:3px; z-index:20;
+    background:var(--line);
+  }
+  .progress-fill{
+    height:100%; width:0%; background:var(--accent);
+    transition: width .45s ease;
+  }
+
+  .deck{ position:absolute; inset:0; z-index:1; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    padding: clamp(1.25rem, 4vw, 3rem) clamp(1.5rem, 6vw, 6rem) clamp(4.5rem, 8vh, 6rem);
+    opacity:0; transform:translateY(18px);
+    pointer-events:none;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .slide.active{ opacity:1; transform:translateY(0); pointer-events:auto; }
+
+  .slide-inner{
+    width:100%; max-width:1180px; max-height:100%;
+    overflow-y:auto;
+  }
+
+  .eyebrow{
+    font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.14em;
+    font-size:clamp(.68rem,1vw,.82rem); color:var(--amber);
+    display:flex; align-items:center; gap:.65rem;
+    margin:0 0 clamp(.9rem,2vh,1.4rem);
+  }
+  .eyebrow::before{ content:''; width:26px; height:1px; background:var(--amber); display:inline-block; }
+
+  .slide-title{
+    font-family:var(--font-display); font-weight:800; text-transform:uppercase;
+    letter-spacing:.005em; line-height:.98; color:var(--paper);
+    text-wrap:balance;
+    font-size:clamp(1.7rem,3.6vw,3rem);
+    margin:0 0 1rem;
+  }
+
+  .lede{
+    font-size:clamp(.98rem,1.3vw,1.2rem); line-height:1.55; color:var(--paper-dim);
+    max-width:66ch; font-weight:400;
+  }
+
+  .panel{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:5px;
+    padding:clamp(1rem,2vw,1.5rem);
+  }
+
+  .gloss{
+    font-size:.62em; font-weight:400; text-transform:none; letter-spacing:0;
+    color:var(--muted); white-space:nowrap;
+  }
+
+  .tag{
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em;
+    padding:.28rem .6rem; border-radius:999px; border:1px solid var(--line-strong);
+    color:var(--paper-dim); background:var(--ink-3);
+  }
+  .tag.amber{ color:var(--amber); border-color:rgba(224,166,60,0.5); background:var(--amber-soft); }
+  .tag.accent{ color:var(--accent); border-color:rgba(79,168,148,0.5); background:var(--accent-soft); }
+
+  /* ---- HUD ---- */
+  .hud{
+    position:absolute; left:0; right:0; bottom:0; z-index:20; height:56px;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:0 clamp(1rem,3vw,2rem);
+    background:var(--ink-2); border-top:1px solid var(--line);
+    font-family:var(--font-mono);
+  }
+  .hud-brand{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); white-space:nowrap; display:flex; align-items:center; gap:.9rem; }
+  .hud-nav{ display:flex; align-items:center; gap:1rem; }
+  .hud-hint{ font-size:.68rem; color:var(--muted); letter-spacing:.04em; display:none; }
+  @media (min-width:720px){ .hud-hint{ display:inline; } }
+
+  .nav-btn{
+    width:34px; height:34px; border-radius:4px;
+    background:var(--ink-3); border:1px solid var(--line-strong); color:var(--paper);
+    font-size:1.1rem; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .nav-btn:disabled{ opacity:.35; cursor:default; }
+  .nav-btn:disabled:hover{ border-color:var(--line-strong); color:var(--paper); }
+
+  .hud-count{ font-size:.85rem; color:var(--paper-dim); font-variant-numeric:tabular-nums; letter-spacing:.05em; }
+  .hud-count b{ color:var(--paper); }
+
+  .dots{
+    position:absolute; right:clamp(.75rem,2vw,1.5rem); top:50%; transform:translateY(-50%);
+    z-index:20; display:flex; flex-direction:column; gap:.55rem;
+  }
+  @media (max-width:640px){ .dots{ display:none; } }
+  .dot{
+    width:8px; height:8px; border-radius:50%; padding:0;
+    background:transparent; border:1px solid var(--line-strong); cursor:pointer;
+  }
+  .dot.active{ background:var(--accent); border-color:var(--accent); }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide{ transition:none; }
+    .progress-fill{ transition:none; }
+    .notes-panel{ transition:none; }
+  }
+
+  /* ---- Notes orateur ---- */
+  .notes-toggle{
+    font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--paper-dim); background:var(--ink-3); border:1px solid var(--line-strong);
+    border-radius:999px; padding:.32rem .75rem; cursor:pointer; white-space:nowrap;
+  }
+  .notes-toggle:hover, .notes-toggle[aria-pressed="true"]{ color:var(--amber); border-color:rgba(224,166,60,0.5); }
+
+  .notes-panel{
+    position:absolute; left:0; right:0; bottom:56px; z-index:30;
+    max-height:66%; overflow-y:auto;
+    background:var(--ink-3); border-top:1px solid var(--amber);
+    padding:1.1rem clamp(1rem,3vw,2.2rem) 1.4rem;
+    transform:translateY(100%); opacity:0; pointer-events:none;
+    transition: transform .35s ease, opacity .35s ease;
+  }
+  .notes-panel.open{ transform:translateY(0); opacity:1; pointer-events:auto; }
+  .notes-head{
+    position:sticky; top:0; background:var(--ink-3);
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--font-mono); font-size:.74rem; text-transform:uppercase; letter-spacing:.1em;
+    color:var(--amber); margin-bottom:.85rem; padding-bottom:.6rem; border-bottom:1px solid var(--line);
+  }
+  .notes-head button{
+    background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; line-height:1; padding:.2rem;
+  }
+  .notes-head button:hover{ color:var(--paper); }
+  .notes-panel ul{ display:flex; flex-direction:column; gap:.9rem; max-width:94ch; }
+  .notes-panel li{
+    font-family:var(--font-body); font-size:.98rem; line-height:1.62; color:var(--paper);
+    display:flex; gap:.7rem;
+  }
+  .notes-panel li::before{ content:'—'; color:var(--amber); flex:none; }
+
+  @media print{
+    .grid-bg, .stage::after, .progress-rail, .hud, .dots, .notes-panel{ display:none !important; }
+    html, body{ background:var(--ink) !important; }
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    .stage{ height:auto; overflow:visible; }
+    .deck{ position:static; }
+    .slide{
+      position:static; opacity:1 !important; transform:none !important; pointer-events:auto;
+      height:100vh; padding:2.5rem 3rem; page-break-after:always; break-after:page;
+    }
+    .slide:last-child{ page-break-after:auto; break-after:auto; }
+    .slide-inner{ overflow:visible; max-height:none; }
+  }
+  @page{ size:landscape; margin:0; }
+
+  /* ===== Slide-specific layouts ===== */
+
+  /* Slide 1 — title */
+  .s-title{ text-align:left; }
+  .s-title .kicker{ font-family:var(--font-mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.18em; color:var(--muted); margin-bottom:1.4rem; }
+  .s-title h1{
+    font-family:var(--font-display); font-weight:900; text-transform:uppercase; color:var(--paper);
+    font-size:clamp(3rem,11vw,7.5rem); line-height:.9; letter-spacing:.005em;
+  }
+  .s-title h1 span{ color:var(--accent); }
+  .s-title .subline{
+    font-family:var(--font-body); font-weight:500; font-size:clamp(1.1rem,2.2vw,1.5rem);
+    color:var(--paper-dim); margin-top:.9rem;
+  }
+  .s-title .meta-row{
+    display:flex; flex-wrap:wrap; gap:.6rem; margin-top:clamp(1.6rem,4vh,2.4rem);
+  }
+  .s-title .datebox{
+    margin-top:clamp(1.6rem,4vh,2.2rem); font-family:var(--font-mono); font-size:.85rem; color:var(--muted);
+    border-top:1px solid var(--line); padding-top:.9rem; max-width:420px;
+  }
+
+  /* Slide 2 — contexte */
+  .quote{
+    font-family:var(--font-display); font-weight:700; text-transform:none;
+    font-size:clamp(1.5rem,3.4vw,2.5rem); line-height:1.18; color:var(--paper);
+    text-wrap:balance; max-width:22ch; margin:1.2rem 0 2.2rem;
+  }
+  .stat-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+  .stat-row .panel .k{ font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--amber); }
+  .stat-row .panel .v{ font-family:var(--font-display); font-weight:700; font-size:clamp(1.3rem,2.4vw,1.8rem); color:var(--paper); margin-top:.4rem; text-transform:uppercase; }
+  .stat-row .panel .d{ margin-top:.35rem; font-size:.88rem; color:var(--paper-dim); }
+
+  /* Slide 3 — équipe */
+  .role-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1.6rem; }
+  .role-card{ padding:1.2rem; }
+  .role-card .name{ font-family:var(--font-display); font-weight:800; font-size:1.5rem; text-transform:uppercase; color:var(--paper); }
+  .role-card .role{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.06em; color:var(--accent); margin-top:.25rem; text-transform:uppercase; }
+  .role-card .num{ font-family:var(--font-mono); font-size:.72rem; color:var(--muted); margin-bottom:.5rem; }
+  .role-card .desc{ font-size:.82rem; color:var(--paper-dim); margin-top:.5rem; line-height:1.4; }
+
+  /* Slide 4 — périmètre */
+  .compare{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+  @media (max-width:760px){ .compare{ grid-template-columns:1fr; } }
+  .compare h3{ font-family:var(--font-mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.9rem; }
+  .compare .in h3{ color:var(--accent); }
+  .compare .out h3{ color:var(--muted); }
+  .compare li{ display:flex; gap:.6rem; padding:.5rem 0; border-top:1px solid var(--line); font-size:.94rem; color:var(--paper-dim); }
+  .compare li:first-of-type{ border-top:none; }
+  .compare .mark{ font-family:var(--font-mono); flex:none; width:1.1rem; }
+  .compare .in .mark{ color:var(--accent); }
+  .compare .out .mark{ color:var(--muted); }
+
+  /* Slide 5 — user stories */
+  .us-big{ display:flex; align-items:baseline; gap:1rem; margin-bottom:1.6rem; }
+  .us-big .num{ font-family:var(--font-display); font-weight:900; font-size:clamp(3.5rem,9vw,6rem); color:var(--accent); line-height:.85; }
+  .us-big .label{ font-size:1rem; color:var(--paper-dim); max-width:22ch; }
+  .bar{ display:flex; height:14px; border-radius:3px; overflow:hidden; border:1px solid var(--line-strong); margin-bottom:1.2rem; }
+  .bar span{ height:100%; }
+  .us-legend{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.5rem .8rem; }
+  .us-legend li{ display:flex; align-items:center; gap:.55rem; font-size:.88rem; color:var(--paper-dim); }
+  .us-legend .swatch{ width:10px; height:10px; border-radius:2px; flex:none; }
+  .us-legend b{ color:var(--paper); font-variant-numeric:tabular-nums; }
+
+  /* Slide 6 — MCD */
+  .timeline{ display:flex; flex-direction:column; gap:.6rem; margin-bottom:1.6rem; }
+  .timeline .step{ display:flex; flex-wrap:wrap; gap:.25rem .9rem; align-items:baseline; font-size:.9rem; color:var(--paper-dim); }
+  .timeline .idx{ font-family:var(--font-mono); color:var(--amber); flex:none; min-width:2.4rem; }
+  .timeline .desc{ flex:1 1 260px; }
+  .rel-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:.55rem; }
+  .rel{
+    font-family:var(--font-mono); font-size:.8rem; color:var(--paper-dim);
+    display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .5rem; padding:.55rem .7rem;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+  }
+  .rel .e{ color:var(--paper); }
+  .rel .arrow{ color:var(--muted); }
+  .rel .flag{ margin-left:auto; font-size:.65rem; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); }
+
+  /* Slide 7 — MLD */
+  .code-block{
+    font-family:var(--font-mono); font-size:clamp(.72rem,1.15vw,.88rem); line-height:1.65;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:5px;
+    padding:1.1rem 1.3rem; color:var(--paper-dim); white-space:pre; overflow-x:auto;
+    margin-bottom:1.4rem;
+  }
+  .code-block .pk{ color:var(--accent); }
+  .code-block .fk{ color:var(--amber); }
+  .code-block .tbl{ color:var(--paper); }
+  .fk-list{ display:grid; gap:.5rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .fk-list li{ font-size:.86rem; color:var(--paper-dim); display:flex; gap:.5rem; }
+  .fk-list .mark{ color:var(--amber); font-family:var(--font-mono); flex:none; }
+  .fk-list .txt{ flex:1 1 auto; min-width:0; }
+
+  /* Slide 8 — stack */
+  .stack-table{ width:100%; border-collapse:collapse; font-size:.92rem; }
+  .stack-table td{ padding:.75rem .5rem; border-top:1px solid var(--line); vertical-align:top; }
+  .stack-table tr:first-child td{ border-top:none; }
+  .stack-table .domain{ font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.07em; font-size:.72rem; color:var(--amber); width:34%; white-space:nowrap; }
+  .stack-table .choice{ font-family:var(--font-mono); color:var(--paper); }
+
+  /* Slide 9 — wireframes */
+  .wf-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.9rem; margin-bottom:1.4rem; }
+  .wf-frame{
+    aspect-ratio:4/3; border:1px solid var(--line-strong); border-radius:3px; background:var(--ink-2);
+    padding:.5rem; display:flex; flex-direction:column; gap:.35rem;
+  }
+  .wf-bar{ height:5px; width:42%; background:var(--muted); border-radius:1px; }
+  .wf-line{ height:3.5px; background:var(--line-strong); border-radius:1px; }
+  .wf-line.w80{ width:80%; } .wf-line.w60{ width:60%; } .wf-line.w40{ width:40%; }
+  .wf-block{ flex:1; border:1px dashed var(--line-strong); border-radius:2px; }
+  .wf-label{ font-family:var(--font-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:var(--paper-dim); margin-top:.5rem; }
+  .wf-label b{ color:var(--amber); }
+  .charte-strip{ display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; }
+
+  /* Slide 10 — bilan */
+  .bilan-cols{ display:grid; grid-template-columns:1.1fr .9fr; gap:1.6rem; }
+  @media (max-width:760px){ .bilan-cols{ grid-template-columns:1fr; } }
+  .check-list li{ display:flex; gap:.6rem; padding:.42rem 0; font-size:.9rem; color:var(--paper-dim); border-top:1px solid var(--line); }
+  .check-list li:first-child{ border-top:none; }
+  .check-list .c{ color:var(--accent); font-family:var(--font-mono); flex:none; }
+  .roadmap .item{ display:flex; gap:.7rem; margin-bottom:1rem; }
+  .roadmap .dotmark{ width:9px; height:9px; border-radius:50%; margin-top:.35rem; flex:none; }
+  .roadmap .done .dotmark{ background:var(--accent); }
+  .roadmap .next .dotmark{ background:var(--amber); }
+  .roadmap .label{ font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .roadmap .text{ font-size:.9rem; color:var(--paper-dim); margin-top:.15rem; }
+  .status-strip{ margin-top:1.2rem; font-family:var(--font-mono); font-size:.78rem; color:var(--muted); border-top:1px solid var(--line); padding-top:.9rem; }
+  .status-strip b{ color:var(--paper); }
+
+  /* Slide 11 — charte graphique */
+  .presenter-tag{ margin-bottom:1.1rem; }
+  .swatch-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1rem; margin-bottom:1.2rem; }
+  .swatch{ padding:0; overflow:hidden; }
+  .swatch .fill{ height:56px; }
+  .swatch .info{ padding:.75rem .9rem; }
+  .swatch .name{ font-family:var(--font-display); font-weight:700; font-size:1rem; text-transform:uppercase; color:var(--paper); }
+  .swatch .hex{ font-family:var(--font-mono); font-size:.68rem; color:var(--muted); margin-top:.15rem; }
+  .swatch .role{ font-size:.8rem; color:var(--paper-dim); margin-top:.4rem; line-height:1.4; }
+  .type-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; margin-bottom:1.2rem; }
+  .type-card .sample{ line-height:1.15; }
+  .type-card .sample.display{ font-family:var(--font-display); font-weight:800; text-transform:uppercase; font-size:1.7rem; color:var(--paper); }
+  .type-card .sample.body{ font-family:var(--font-body); font-size:1.02rem; color:var(--paper); }
+  .type-card .label{ font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--amber); margin-top:.6rem; }
+</style>
+
+<div class="stage">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="progress-rail" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="deck" id="deck">
+
+    <!-- 1 -->
+    <section class="slide s-title" data-title="Ouverture">
+      <div class="slide-inner">
+        <p class="kicker">Dossier de projet · DWWM <span class="gloss">(Développeur Web et Web Mobile)</span></p>
+        <h1>Troc<span>Troc</span></h1>
+        <p class="subline">Sprint 0 — Cadrage &amp; conception</p>
+        <div class="meta-row">
+          <span class="tag accent">Narimen · Tech Lead</span>
+          <span class="tag accent">Chris · Product Owner</span>
+          <span class="tag accent">Tahma · Scrum Master</span>
+        </div>
+        <div class="datebox">25 – 27.08.2026 · Livrables : user stories, MCD, MLD, dictionnaire de données, endpoints, wireframes, charte graphique</div>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide" data-title="Contexte">
+      <div class="slide-inner">
+        <p class="eyebrow">01 — Contexte &amp; problématique</p>
+        <p class="quote">Faciliter l'achat, la vente et l'échange d'objets de seconde main entre particuliers, en privilégiant les échanges locaux.</p>
+        <div class="stat-row">
+          <div class="panel">
+            <div class="k">Cible</div>
+            <div class="v">Particuliers</div>
+            <div class="d">Pas de professionnels, pas de paiement ni livraison géré par la plateforme.</div>
+          </div>
+          <div class="panel">
+            <div class="k">Portée géographique</div>
+            <div class="v">50 km</div>
+            <div class="d">Filtrage des annonces autour du code postal de l'utilisateur.</div>
+          </div>
+          <div class="panel">
+            <div class="k">Mise en relation</div>
+            <div class="v">Messagerie interne</div>
+            <div class="d">Une conversation par annonce entre acheteur et vendeur.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide" data-title="Équipe">
+      <div class="slide-inner">
+        <p class="eyebrow">02 — Équipe &amp; méthode</p>
+        <h2 class="slide-title">Objectif du Sprint 0</h2>
+        <div class="role-row">
+          <div class="panel role-card"><div class="num">01</div><div class="name">Narimen</div><div class="role">Tech Lead</div><div class="desc">Choisit les solutions techniques et garantit qu'elles sont solides et cohérentes.</div></div>
+          <div class="panel role-card"><div class="num">02</div><div class="name">Chris</div><div class="role">Product Owner</div><div class="desc">Porte la vision du site et décide de ce qui est prioritaire pour vous et vos futurs utilisateurs.</div></div>
+          <div class="panel role-card"><div class="num">03</div><div class="name">Tahma</div><div class="role">Scrum Master</div><div class="desc">Organise le travail de l'équipe pour avancer efficacement, sans blocage.</div></div>
+        </div>
+        <p class="lede">Trois jours pour produire l'ensemble des livrables de conception avant la première ligne de code&nbsp;: user stories, MCD/MLD, dictionnaire de données, endpoints, wireframes et charte graphique — confrontés en continu au cahier des charges officiel de l'équipe pédagogique.</p>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide" data-title="Périmètre">
+      <div class="slide-inner">
+        <p class="eyebrow">03 — Périmètre du MVP <span class="gloss">(Minimum Viable Product)</span></p>
+        <h2 class="slide-title">Ce qu'on construit — et pas encore</h2>
+        <div class="compare">
+          <div class="in">
+            <h3>Dans le MVP</h3>
+            <ul>
+              <li><span class="mark">＋</span>Page d'accueil (dernières annonces, catégories)</li>
+              <li><span class="mark">＋</span>Inscription / connexion / déconnexion</li>
+              <li><span class="mark">＋</span>Dépôt d'annonce (titre, prix, catégorie, photos)</li>
+              <li><span class="mark">＋</span>Recherche &amp; filtres (catégorie, rayon 50 km)</li>
+              <li><span class="mark">＋</span>Détail d'annonce + contact vendeur</li>
+              <li><span class="mark">＋</span>Espace personnel (gérer ses annonces)</li>
+              <li><span class="mark">＋</span>Messagerie interne</li>
+            </ul>
+          </div>
+          <div class="out">
+            <h3>Évolutions potentielles</h3>
+            <ul>
+              <li><span class="mark">–</span>Favoris</li>
+              <li><span class="mark">–</span>Évaluations &amp; avis vendeurs</li>
+              <li><span class="mark">–</span>Tableau de bord d'administration</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide" data-title="User stories">
+      <div class="slide-inner">
+        <p class="eyebrow">04 — User stories</p>
+        <div class="us-big">
+          <div class="num">21</div>
+          <div class="label">user stories rédigées, réparties sur 6 domaines fonctionnels</div>
+        </div>
+        <div class="bar" aria-hidden="true">
+          <span style="width:4.8%;background:#4FA894"></span>
+          <span style="width:14.3%;background:#3D8A79"></span>
+          <span style="width:28.6%;background:#E0A63C"></span>
+          <span style="width:9.5%;background:#C98A2E"></span>
+          <span style="width:23.8%;background:#7E96A1"></span>
+          <span style="width:19%;background:#5A6E77"></span>
+        </div>
+        <ul class="us-legend">
+          <li><span class="swatch" style="background:#4FA894"></span>Accueil — <b>1</b></li>
+          <li><span class="swatch" style="background:#3D8A79"></span>Authentification — <b>3</b></li>
+          <li><span class="swatch" style="background:#E0A63C"></span>Annonces — <b>6</b></li>
+          <li><span class="swatch" style="background:#C98A2E"></span>Détail d'annonce — <b>2</b></li>
+          <li><span class="swatch" style="background:#7E96A1"></span>Messagerie — <b>5</b></li>
+          <li><span class="swatch" style="background:#5A6E77"></span>Espace personnel — <b>4</b></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide" data-title="MCD">
+      <div class="slide-inner">
+        <p class="eyebrow">05 — Modélisation des données</p>
+        <h2 class="slide-title">Un modèle qui a bougé deux fois</h2>
+        <p class="lede">Ce que pourra faire l'utilisateur&nbsp;: créer son compte, mettre en ligne ce qu'il souhaite troquer ou vendre (avec photos), et discuter avec d'autres membres pour se mettre d'accord.</p>
+        <div class="rel-grid">
+          <div class="rel"><span class="e">UTILISATEUR</span><span class="arrow">──crée──▶</span><span class="e">ANNONCE</span></div>
+          <div class="rel"><span class="e">CATEGORIE</span><span class="arrow">──classe──▶</span><span class="e">ANNONCE</span></div>
+          <div class="rel"><span class="e">STATUT</span><span class="arrow">──concerne──▶</span><span class="e">ANNONCE</span><span class="flag">nouveau</span></div>
+          <div class="rel"><span class="e">ANNONCE</span><span class="arrow">──possède──▶</span><span class="e">PHOTO</span></div>
+          <div class="rel"><span class="e">ANNONCE</span><span class="arrow">──contient──▶</span><span class="e">CONVERSATION</span></div>
+          <div class="rel"><span class="e">UTILISATEUR</span><span class="arrow">⇄ PARTICIPE ⇄</span><span class="e">CONVERSATION</span><span class="flag">réintroduite</span></div>
+          <div class="rel"><span class="e">CONVERSATION</span><span class="arrow">──contient──▶</span><span class="e">MESSAGE</span></div>
+          <div class="rel"><span class="e">UTILISATEUR</span><span class="arrow">──envoie──▶</span><span class="e">MESSAGE</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide" data-title="MLD">
+      <div class="slide-inner">
+        <p class="eyebrow">06 — Du MCD <span class="gloss">(Modèle Conceptuel de Données)</span> au MLD <span class="gloss">(Modèle Logique de Données)</span></p>
+        <h2 class="slide-title">Dictionnaire de données</h2>
+        <p class="lede">Ce schéma décrit comment sera organisée la base de données de l'application — le classeur numérique où seront rangées, de façon fiable et structurée, toutes les informations (annonces, messages, comptes utilisateurs…) que le site devra stocker et retrouver au quotidien.</p>
+        <div class="code-block">ANNONCE (<span class="pk">id_annonce</span>, titre, description, prix, date_publication,
+<span class="fk">date_suppression</span>, <span class="fk">#id_utilisateur</span>, <span class="fk">#id_categorie</span>, <span class="fk">#id_statut</span>)
+
+PARTICIPE (<span class="fk">#id_utilisateur</span>, <span class="fk">#id_conversation</span>)
+
+MESSAGE (<span class="pk">id_message</span>, contenu, date_envoi, <span class="fk">#id_conversation</span>, <span class="fk">#id_expediteur</span>)</div>
+        <ul class="fk-list">
+          <li><span class="mark">#</span><span class="txt">Suppression douce&nbsp;: <code>date_suppression</code> reste <code>NULL</code> tant que l'annonce est active.</span></li>
+          <li><span class="mark">#</span><span class="txt"><code>MESSAGE.id_expediteur</code> distingue qui, de l'acheteur ou du vendeur, a écrit le message.</span></li>
+          <li><span class="mark">#</span><span class="txt"><code>PARTICIPE</code> porte une clé composite (id_utilisateur, id_conversation).</span></li>
+          <li><span class="mark">#</span><span class="txt">Règle de placement des FK <span class="gloss">(Foreign Key / clé étrangère)</span>&nbsp;: côté (1,1) d'une association (1,N).</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide" data-title="Stack">
+      <div class="slide-inner">
+        <p class="eyebrow">07 — Stack technique</p>
+        <h2 class="slide-title">Cohérente avec le MVP et la formation</h2>
+        <table class="stack-table">
+          <tr><td class="domain">Frontend</td><td class="choice">JavaScript, Svelte</td></tr>
+          <tr><td class="domain">Backend</td><td class="choice">Node.js, Express</td></tr>
+          <tr><td class="domain">Base de données</td><td class="choice">PostgreSQL</td></tr>
+          <tr><td class="domain">ORM <span class="gloss">(Object-Relational Mapping)</span></td><td class="choice">Sequelize</td></tr>
+          <tr><td class="domain">Authentification</td><td class="choice">JWT <span class="gloss">(JSON Web Token — jeton d'authentification)</span> + cookies HTTP-only <span class="gloss">(HyperText Transfer Protocol)</span></td></tr>
+          <tr><td class="domain">Outils</td><td class="choice">Git / GitHub</td></tr>
+          <tr><td class="domain">Déploiement</td><td class="choice">Docker</td></tr>
+        </table>
+        <p class="lede" style="margin-top:1.2rem;">Architecture front/back séparée — suffisamment simple pour le MVP <span class="gloss">(Minimum Viable Product)</span>, sans fermer la porte aux évolutions.</p>
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide" data-title="Wireframes">
+      <div class="slide-inner">
+        <p class="eyebrow">08 — Wireframes &amp; charte graphique</p>
+        <h2 class="slide-title">9 écrans, première charte</h2>
+        <div class="wf-grid">
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w60"></span><span class="wf-block"></span></div><p class="wf-label"><b>01</b> Accueil</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w80"></span><span class="wf-block"></span></div><p class="wf-label"><b>02</b> Liste annonces</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w40"></span><span class="wf-block"></span></div><p class="wf-label"><b>03</b> Détail annonce</p></div>
+          <div><div class="wf-frame"><span class="wf-line w60"></span><span class="wf-line w40"></span><span class="wf-block"></span></div><p class="wf-label"><b>04</b> Connexion</p></div>
+          <div><div class="wf-frame"><span class="wf-line w60"></span><span class="wf-line w80"></span><span class="wf-block"></span></div><p class="wf-label"><b>05</b> Inscription</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w40"></span><span class="wf-block"></span></div><p class="wf-label"><b>06</b> Dépôt d'annonce</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w80"></span><span class="wf-block"></span></div><p class="wf-label"><b>07</b> Espace personnel</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w60"></span><span class="wf-block"></span></div><p class="wf-label"><b>08</b> Messagerie · liste</p></div>
+          <div><div class="wf-frame"><span class="wf-bar"></span><span class="wf-line w40"></span><span class="wf-block"></span></div><p class="wf-label"><b>09</b> Messagerie · fil</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide" data-title="Bilan">
+      <div class="slide-inner">
+        <p class="eyebrow">09 — Bilan &amp; suite</p>
+        <h2 class="slide-title">Sprint 0 : conception livrée</h2>
+        <div class="bilan-cols">
+          <ul class="check-list">
+            <li><span class="c">✓</span>Cahier des charges validé avec l'équipe pédagogique</li>
+            <li><span class="c">✓</span>21 user stories réparties sur 6 domaines</li>
+            <li><span class="c">✓</span>MCD <span class="gloss">(Modèle Conceptuel de Données)</span> / MLD <span class="gloss">(Modèle Logique de Données)</span> / dictionnaire de données</li>
+            <li><span class="c">✓</span>22 endpoints <span class="gloss">(points d'accès de l'API)</span> d'API spécifiés</li>
+            <li><span class="c">✓</span>9 wireframes texte + charte graphique v1</li>
+          </ul>
+          <div class="roadmap">
+            <div class="item done"><span class="dotmark"></span><div><div class="label">Fait</div><div class="text">Branche <code>sprint-0-conception</code> → mergée sur <code>projet-troctroc</code>, poussée sur GitHub</div></div></div>
+            <div class="item done"><span class="dotmark"></span><div><div class="label">Fait</div><div class="text">Valeurs de STATUT tranchées en équipe&nbsp;: <code>disponible</code> / <code>vendu</code></div></div></div>
+            <div class="item next"><span class="dotmark"></span><div><div class="label">Sprint 1</div><div class="text">Mise en place de l'environnement, premières routes API, premiers écrans Svelte</div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide" data-title="Charte graphique">
+      <div class="slide-inner">
+        <p class="eyebrow">10 — Charte graphique</p>
+        <div class="presenter-tag"><span class="tag accent">Présenté par Narimen · Tech Lead</span></div>
+        <h2 class="slide-title">Une identité visuelle simple et reconnaissable</h2>
+        <p class="lede">En clair&nbsp;: ce sont les règles visuelles du site — couleurs, typographies, style des boutons — pour que TrocTroc soit reconnaissable d'un écran à l'autre et inspire confiance aux utilisateurs.</p>
+        <div class="swatch-grid">
+          <div class="panel swatch">
+            <div class="fill" style="background:var(--ink);"></div>
+            <div class="info"><div class="name">Fond</div><div class="hex">#0F1B24</div><div class="role">Arrière-plan des écrans, sobre, met le contenu en valeur.</div></div>
+          </div>
+          <div class="panel swatch">
+            <div class="fill" style="background:var(--paper);"></div>
+            <div class="info"><div class="name">Papier</div><div class="hex">#ECEEE7</div><div class="role">Texte principal, bonne lisibilité sur fond sombre.</div></div>
+          </div>
+          <div class="panel swatch">
+            <div class="fill" style="background:var(--accent);"></div>
+            <div class="info"><div class="name">Confiance</div><div class="hex">#4FA894</div><div class="role">Boutons d'action et liens — la couleur qui confirme.</div></div>
+          </div>
+          <div class="panel swatch">
+            <div class="fill" style="background:var(--amber);"></div>
+            <div class="info"><div class="name">Repère</div><div class="hex">#E0A63C</div><div class="role">Numéros et mises en avant, pour guider l'œil sans agresser.</div></div>
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="panel type-card"><div class="sample display">Aa — TrocTroc</div><div class="label">Titres — Big Shoulders Display</div></div>
+          <div class="panel type-card"><div class="sample body">Aa — Déposez une annonce en quelques clics.</div><div class="label">Texte courant — IBM Plex Sans</div></div>
+        </div>
+        <div class="charte-strip">
+          <span class="tag">Logo</span><span class="tag">Boutons arrondis</span><span class="tag">Icônes simples</span><span class="tag accent">Version 1 — à affiner en Sprint 1</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="notes-panel" id="notesPanel">
+    <div class="notes-head">
+      <span id="notesTitle">Notes orateur</span>
+      <button id="closeNotes" aria-label="Fermer les notes">✕</button>
+    </div>
+    <ul id="notesList"></ul>
+  </div>
+
+  <div class="hud">
+    <div class="hud-brand">
+      <span>TrocTroc · Sprint 0</span>
+      <button class="notes-toggle" id="notesToggle" aria-pressed="false">Notes</button>
+    </div>
+    <div class="hud-nav">
+      <button class="nav-btn" id="prevBtn" aria-label="Diapositive précédente">‹</button>
+      <div class="hud-count"><b id="curNum">01</b> / <span id="totNum">11</span></div>
+      <button class="nav-btn" id="nextBtn" aria-label="Diapositive suivante">›</button>
+    </div>
+    <div class="hud-hint">↑ ↓ / ← → · Espace · N = notes</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsWrap = document.getElementById('dots');
+  var curNum = document.getElementById('curNum');
+  var totNum = document.getElementById('totNum');
+  var progressFill = document.getElementById('progressFill');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var notesPanel = document.getElementById('notesPanel');
+  var notesToggle = document.getElementById('notesToggle');
+  var closeNotes = document.getElementById('closeNotes');
+  var notesList = document.getElementById('notesList');
+  var notesTitle = document.getElementById('notesTitle');
+  var idx = 0;
+  var notesOpen = false;
+
+  var notes = [
+    [ // 1 — Ouverture
+      "Se présenter et présenter l'équipe : « Bonjour, je suis Chris, Product Owner sur TrocTroc, un projet mené avec Narimen, notre Tech Lead — elle garantit que nos choix techniques tiennent la route — et Tahma, notre Scrum Master, qui anime notre façon de travailler en équipe. »",
+      "Expliquer le projet en une phrase compréhensible par tous : « TrocTroc est un site où des particuliers peuvent vendre, acheter ou échanger entre eux des objets d'occasion près de chez eux — un peu comme un vide-grenier permanent en ligne, mais entre voisins. »",
+      "Expliquer ce qu'est un « Sprint 0 » pour quelqu'un qui ne connaît pas l'agilité : « Dans notre méthode de travail, on avance par périodes appelées sprints. Le Sprint 0, c'est la toute première étape : avant d'écrire une seule ligne de code, on prend le temps de tout réfléchir et préparer sur le papier — un peu comme un plan avant de construire une maison. C'est ce travail de trois jours que je vais vous présenter. »"
+    ],
+    [ // 2 — Contexte
+      "Partir d'un exemple concret et parlant : « Beaucoup de gens ont chez eux un vélo, un canapé ou des vêtements dont ils ne se servent plus, et aimeraient les vendre ou les donner facilement à quelqu'un du coin plutôt que de les jeter. C'est exactement le problème que TrocTroc essaie de résoudre. »",
+      "Bien préciser la cible : des particuliers entre eux, pas des professionnels — et l'accent est mis sur le « local » plutôt que sur la plus grande offre possible.",
+      "Expliquer clairement le rôle (limité) de la plateforme : « TrocTroc ne fait que mettre en relation l'acheteur et le vendeur. Une fois qu'ils se sont mis d'accord, ils s'arrangent entre eux pour le paiement et la remise de l'objet, exactement comme sur un site de petites annonces classique. »",
+      "Justifier le rayon de 50 km en une phrase simple : « On limite volontairement les annonces à 50 km autour de chez soi pour que ce soit toujours pratique de récupérer l'objet en personne. »"
+    ],
+    [ // 3 — Équipe & méthode
+      "Expliquer chaque rôle avec des mots simples, sans jargon : « Le Product Owner porte la vision du produit et décide de ce qui est prioritaire pour les utilisateurs. Le Tech Lead s'assure que les choix techniques sont solides et cohérents. Le Scrum Master veille à ce que l'équipe travaille bien ensemble et avance sans blocage. »",
+      "Filer la métaphore du plan de maison : « On ne pose pas de briques avant d'avoir un plan. Ces trois jours de Sprint 0 sont notre plan complet avant de commencer à coder. »",
+      "Insister sur un point important pour la méthode : on n'a rien inventé dans son coin — à chaque étape, on a comparé notre travail à un cahier des charges officiel fourni par l'équipe pédagogique, et corrigé ce qui ne collait pas."
+    ],
+    [ // 4 — Périmètre du MVP
+      "Expliquer le mot MVP simplement : « MVP veut dire Minimum Viable Product, c'est-à-dire la version la plus simple du site qui reste vraiment utile et utilisable — on construit d'abord l'essentiel, avant d'ajouter des options en plus. »",
+      "Passer rapidement en revue les 7 fonctionnalités en une phrase chacune si besoin : voir la page d'accueil, créer un compte, déposer une annonce avec photos, rechercher et filtrer, voir le détail d'un article et contacter le vendeur, gérer ses propres annonces, et discuter par messagerie.",
+      "Expliquer la colonne de droite : « Ce sont des idées qu'on garde de côté pour une version future — favoris, avis sur les vendeurs, outil de modération — mais qu'on ne développe pas maintenant pour rester concentrés sur l'essentiel. »"
+    ],
+    [ // 5 — User stories
+      "Expliquer ce qu'est une user story avec des mots simples : « C'est une façon d'écrire un besoin utilisateur sous une forme toujours identique : En tant que [quelqu'un], je veux [faire quelque chose] afin de [obtenir un résultat]. Ça oblige à toujours penser du point de vue de la personne qui utilise le site, pas de la technique. »",
+      "Donner un exemple concret lu à voix haute, par exemple : « En tant qu'acheteur, je veux démarrer une conversation avec le vendeur depuis une annonce afin de pouvoir échanger avec lui. »",
+      "Expliquer la répartition : « On a écrit 21 user stories au total, réparties en 6 grands thèmes. Ce n'est pas équilibré, et c'est normal : les annonces et la messagerie concentrent à elles seules plus de la moitié des besoins, car c'est le cœur de l'usage du site. »"
+    ],
+    [ // 6 — MCD (modèle conceptuel de données)
+      "Expliquer ce qu'est un MCD en partant de zéro : « Avant de construire une base de données, il faut d'abord dessiner un schéma qui liste toutes les choses importantes du site — un utilisateur, une annonce, une catégorie — et comment elles sont reliées entre elles. C'est ce schéma qu'on appelle le MCD. »",
+      "Raconter l'histoire comme un vrai travail vivant, pas figé du premier coup : « Ce schéma a changé deux fois en trois jours. La première fois en le comparant avec le cahier des charges officiel, la deuxième fois parce que l'équipe a proposé une nouvelle version le lendemain. »",
+      "Traduire chaque changement en langage courant : « On a créé une fiche à part pour représenter l'état d'une annonce (disponible, vendue…) plutôt qu'un simple mot écrit en vrac ; on a ajouté une façon de cacher une annonce supprimée sans vraiment l'effacer, pour garder un historique ; et on a remis en place un système qui permet à plusieurs personnes de participer à une même conversation. »",
+      "Préciser la décision prise en équipe sur ce point : « On a tranché les valeurs possibles pour le statut d'une annonce : disponible ou vendu. »"
+    ],
+    [ // 7 — MLD (modèle logique de données)
+      "Expliquer le lien avec la slide précédente : « Une fois qu'on sait QUOI représenter avec le MCD, le MLD, c'est la traduction technique : on écrit précisément comment chaque information sera rangée dans la base de données, colonne par colonne. »",
+      "Expliquer les deux mots techniques affichés à l'écran, très simplement : « une clé primaire, c'est l'identifiant unique de chaque ligne — un peu comme un numéro de sécurité sociale. Une clé étrangère, c'est un lien vers une autre fiche, par exemple l'annonce à laquelle appartient une photo. »",
+      "Donner un exemple très concret et parlant pour la suppression douce : « Quand un vendeur supprime son annonce, on ne l'efface pas vraiment de la base — on note juste la date à laquelle elle a été supprimée. Ça évite de perdre l'historique, par exemple les messages échangés à son sujet. »",
+      "Expliquer pourquoi on garde une trace de l'expéditeur d'un message : dans une conversation à deux personnes, il faut bien pouvoir dire qui a écrit quoi."
+    ],
+    [ // 8 — Stack technique
+      "Expliquer le mot « stack » très simplement : « C'est l'ensemble des outils et langages informatiques choisis pour construire le site — un peu comme les matériaux et les outils utilisés pour construire une maison. »",
+      "Passer chaque brique en une phrase accessible : « Svelte affiche les pages dans le navigateur de l'utilisateur. Node.js et Express font tourner le programme côté serveur qui traite les demandes. PostgreSQL est la base de données où sont stockées toutes les informations. Sequelize fait le lien entre notre code et cette base de données. JWT permet de garder l'utilisateur connecté en sécurité. Docker permet de faire tourner le site à l'identique sur n'importe quel ordinateur. »",
+      "Justifier le choix en une phrase : ces outils correspondent à ce qu'on a appris en formation, donc toute l'équipe est à l'aise pour les utiliser efficacement."
+    ],
+    [ // 9 — Wireframes & charte graphique
+      "Expliquer le mot wireframe : « C'est un croquis très simple de chaque écran du site, qui montre où seront les boutons, les textes, les images — sans se soucier des couleurs ni du design final. Un peu comme le plan d'un architecte, avant la décoration intérieure. »",
+      "Donner le chiffre en contexte : « On en a fait 9, un pour chaque écran clé du parcours utilisateur : l'accueil, la liste et le détail d'une annonce, la connexion, l'inscription, le dépôt d'annonce, l'espace personnel, et la messagerie (liste des conversations, puis fil de discussion). »",
+      "Expliquer la charte graphique en une phrase, sans entrer dans le détail : « C'est l'identité visuelle du site — le logo, les couleurs, la police d'écriture, le style des boutons. On en a préparé une première version, que Narimen va détailler à la fin de la présentation. »",
+      "Mentionner l'outil utilisé, FigJam, un tableau collaboratif en ligne où toute l'équipe peut voir et commenter ce travail en temps réel."
+    ],
+    [ // 10 — Bilan & suite
+      "Résumer simplement ce qui a été accompli : « En trois jours, on est passé d'une idée à un plan complet et documenté, prêt à être développé : les besoins utilisateurs, le schéma de données, les actions de l'API, les premiers écrans et une première identité visuelle. »",
+      "Expliquer où en est le travail concrètement : « Tout ce travail a été enregistré et partagé sur GitHub, l'endroit où notre équipe stocke et fait évoluer le code du projet ensemble. »",
+      "Annoncer la suite avec enthousiasme : « Le Sprint 1 commence maintenant : on va mettre en place l'environnement de travail, écrire les premières routes de l'API, et construire les premiers écrans réels avec Svelte. »",
+      "Confirmer que le dernier point en suspens est réglé : « Les valeurs du statut d'une annonce sont maintenant tranchées — disponible ou vendu — donc rien ne bloque plus le passage au Sprint 1. »"
+    ],
+    [ // 11 — Charte graphique (Narimen)
+      "Passer la parole : « Je laisse maintenant Narimen vous présenter notre identité visuelle. »",
+      "Expliquer la charte graphique en une phrase pour un public non technique : « Ce sont les règles visuelles du site — les couleurs, les polices d'écriture, le style des boutons — pour que TrocTroc soit reconnaissable d'un écran à l'autre et inspire confiance. »",
+      "Commenter la palette avec des mots simples : « Un fond sombre pour un rendu sobre et moderne, un texte clair pour une bonne lisibilité, un vert qui signale les actions de confiance comme valider ou envoyer, et un doré pour attirer l'œil sur les points importants. »",
+      "Préciser que c'est une première version : « Cette charte va encore évoluer légèrement pendant le Sprint 1, au fil de l'intégration réelle sur les écrans. »"
+    ]
+  ];
+
+  totNum.textContent = String(slides.length).padStart(2,'0');
+
+  var dots = slides.map(function(s, i){
+    var b = document.createElement('button');
+    b.className = 'dot';
+    b.setAttribute('aria-label', 'Aller à la diapositive ' + (i+1) + ' — ' + (s.dataset.title || ''));
+    b.addEventListener('click', function(){ go(i); });
+    dotsWrap.appendChild(b);
+    return b;
+  });
+
+  function renderNotes(){
+    notesTitle.textContent = 'Notes orateur — ' + (slides[idx].dataset.title || ('Diapo ' + (idx+1)));
+    notesList.innerHTML = '';
+    (notes[idx] || []).forEach(function(text){
+      var li = document.createElement('li');
+      li.textContent = text;
+      notesList.appendChild(li);
+    });
+  }
+
+  function render(){
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === idx); });
+    dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+    curNum.textContent = String(idx+1).padStart(2,'0');
+    progressFill.style.width = (slides.length > 1 ? (idx / (slides.length - 1)) * 100 : 100) + '%';
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === slides.length - 1;
+    renderNotes();
+  }
+
+  function go(n){
+    idx = Math.min(slides.length - 1, Math.max(0, n));
+    render();
+  }
+
+  function setNotesOpen(open){
+    notesOpen = open;
+    notesPanel.classList.toggle('open', notesOpen);
+    notesToggle.setAttribute('aria-pressed', String(notesOpen));
+  }
+
+  prevBtn.addEventListener('click', function(){ go(idx - 1); });
+  nextBtn.addEventListener('click', function(){ go(idx + 1); });
+  notesToggle.addEventListener('click', function(){ setNotesOpen(!notesOpen); });
+  closeNotes.addEventListener('click', function(){ setNotesOpen(false); });
+
+  window.addEventListener('keydown', function(e){
+    if (['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key) !== -1){ e.preventDefault(); go(idx + 1); }
+    else if (['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key) !== -1){ e.preventDefault(); go(idx - 1); }
+    else if (e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if (e.key === 'End'){ e.preventDefault(); go(slides.length - 1); }
+    else if (e.key === 'n' || e.key === 'N'){ e.preventDefault(); setNotesOpen(!notesOpen); }
+    else if (e.key === 'Escape' && notesOpen){ setNotesOpen(false); }
+  });
+
+  render();
+})();
+</script>
