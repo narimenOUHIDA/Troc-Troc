@@ -1,16 +1,53 @@
 # TrocTroc
 
-Plateforme de petites annonces entre particuliers.
+Plateforme de petites annonces entre particuliers, pour l'achat, la vente et l'échange d'articles en local (rayon de 50 km).
+
+## Conception
+
+Cahier des charges, user stories, wireframes, MCD/MLD et dictionnaire des données : [docs/conception/troctroc-cahier-des-charges.md](docs/conception/troctroc-cahier-des-charges.md).
 
 ## Stack
 
-- Svelte
-- Node.js
-- Express
-- PostgreSQL
-- Sequelize
-- JWT
+- Svelte (SvelteKit) — frontend
+- Node.js / Express — backend
+- PostgreSQL / Sequelize — base de données
+- JWT — authentification
 - Docker
+
+## Structure du projet
+
+```text
+apo-dwwm-troctroc/
+├── frontend/          # Application SvelteKit
+├── backend/           # API Express (en cours de mise en place)
+└── docs/conception/   # Cahier des charges, user stories, wireframes, MCD/MLD
+```
+
+## Prérequis
+
+- Node.js (>= 18)
+- npm
+- PostgreSQL
+
+## Installation
+
+```bash
+git clone git@github.com:O-clock-Kyoto/apo-dwwm-troctroc.git
+cd apo-dwwm-troctroc
+npm install
+```
+
+Le projet est un monorepo npm workspaces (`frontend`, `backend`).
+
+## Lancer le projet
+
+Frontend (SvelteKit) :
+
+```bash
+npm run dev --workspace=frontend
+```
+
+Backend (Express) : à venir, le serveur n'est pas encore initialisé.
 
 ## Équipe
 

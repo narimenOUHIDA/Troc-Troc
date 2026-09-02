@@ -1,0 +1,793 @@
+/* Charte graphique — docs/conception/charte (1).pdf (déposée le 01/09/2026, fait foi sur l'ancienne
+   charte v1 du sprint 0 : fond clair "Fond"/"Blanc", texte "Couleur sombre", vert "Vert Troc" pour les
+   actions, doré "Couleur d'accent" pour les mises en avant). Valeurs ci-dessous mesurées au pixel sur
+   les pastilles du PDF (page "La palette de couleurs").
+
+   Thème clair/sombre : le thème CLAIR ci-dessous est désormais la valeur par défaut, conforme à la
+   charte (qui ne montre que ce thème). Le mode sombre est une extension non spécifiée par la charte,
+   dérivée des deux couleurs d'ancrage déjà fournies (Fond ↔ Couleur sombre échangés), gardée pour ne
+   pas perdre la fonctionnalité déjà en place. Bascule automatique via prefers-color-scheme, ou
+   explicite via [data-theme] posé sur <html> par ThemeToggle.svelte (bouton slide dans l'en-tête).
+   --color-overlay-rgb factorise les bordures/fonds translucides (rgba(var(--color-overlay-rgb), X)) :
+   basé sur Gris en clair, sur Fond en sombre, pour rester subtil et lisible dans les deux cas. */
+:root {
+	--color-fond: #f7f5ef;
+	--color-surface: #ffffff;
+	--color-texte: #19352b;
+	--color-vert-troc: #2f7d5b;
+	--color-accent: #f4c95d;
+	--color-gris: #68756f;
+	--color-overlay-rgb: 104, 117, 111;
+	/* Texte sur un fond --color-vert-troc (bouton principal) : toujours blanc, quel que soit le thème
+	   (mesuré sur la charte, page "Les boutons"). */
+	--color-sur-vert-troc: #ffffff;
+	/* Fond fixe (indépendant du thème) sous le logo image (logo-mobile.png) : ses couleurs (vert très
+	   foncé + vert moyen) sont conçues pour un fond clair et deviendraient illisibles sur l'en-tête du
+	   thème sombre sans cette pastille claire constante. */
+	--color-logo-fond: #f7f5ef;
+	/* Couleurs fixes (indépendantes du thème) : usages où la charte impose une teinte précise plutôt
+	   que de suivre le thème actif. */
+	--color-sombre-fixe: #19352b; /* survol des boutons primaires, fond du pied de page */
+	--color-vert-troc-disabled-fond: #b6d1c5;
+	--color-vert-troc-disabled-texte: #e0e8e0;
+	--color-vendu-fond: #5f5e5a;
+	--color-vendu-texte: #ffffff;
+	--color-erreur: #b91c1c;
+	--color-pied-fond: #19352b;
+	--color-pied-texte: #f7f5ef;
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--color-fond: #19352b;
+		--color-surface: #20402f;
+		--color-texte: #f7f5ef;
+		--color-vert-troc: #2f7d5b;
+		--color-accent: #f4c95d;
+		--color-gris: #a8b3ad;
+		--color-overlay-rgb: 247, 245, 239;
+		color-scheme: dark;
+	}
+}
+
+:root[data-theme='dark'] {
+	--color-fond: #19352b;
+	--color-surface: #20402f;
+	--color-texte: #f7f5ef;
+	--color-vert-troc: #2f7d5b;
+	--color-accent: #f4c95d;
+	--color-gris: #a8b3ad;
+	--color-overlay-rgb: 247, 245, 239;
+	color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+	--color-fond: #f7f5ef;
+	--color-surface: #ffffff;
+	--color-texte: #19352b;
+	--color-vert-troc: #2f7d5b;
+	--color-accent: #f4c95d;
+	--color-gris: #68756f;
+	--color-overlay-rgb: 104, 117, 111;
+	color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Typographies de la charte (page "Les typographies") : Poppins pour les titres (H1 bold, H2/H3
+   semibold), Inter pour le texte courant (body 16px = taille par défaut du navigateur, donc rien à
+   forcer). Chargées via Google Fonts dans app.html. */
+body {
+	margin: 0;
+	font-family:
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif;
+	background: var(--color-fond);
+	color: var(--color-texte);
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+h1,
+h2,
+h3 {
+	font-family:
+		'Poppins',
+		system-ui,
+		-apple-system,
+		sans-serif;
+}
+
+h1 {
+	font-weight: 700;
+}
+
+h2,
+h3 {
+	font-weight: 600;
+}
+
+/* Affordance de focus clavier commune à tous les champs/boutons (couleur de marque plutôt que le bleu
+   par défaut du navigateur) : correspond aux états "Focus" de la charte, page "Les champs de
+   formulaire". S'applique aussi aux filtres de /annonces (volontairement non stylés par ailleurs) :
+   c'est de l'accessibilité, pas de la décoration. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+	outline: 2px solid var(--color-vert-troc);
+	outline-offset: 1px;
+}
+
+/* Mobile-first : sur petit écran le header s'empile en 3 lignes (logo+auth / recherche / nav) via
+   flex-wrap + order, pour garder de grandes zones tactiles sans faire tenir 4 blocs sur une seule ligne
+   étroite. À partir de 48rem (768px) il repasse sur une seule ligne (cf. media query en bas de fichier). */
+.site-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem 1.5rem;
+	padding: 1rem 1.5rem;
+	background: var(--color-surface);
+	border-bottom: 1px solid rgba(var(--color-overlay-rgb), 0.15);
+}
+
+.logo {
+	order: 1;
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	color: inherit;
+	background: var(--color-logo-fond);
+	padding: 0.35rem 0.75rem;
+	border-radius: 0.5rem;
+}
+
+.logo img {
+	display: block;
+	height: 1.5rem;
+	width: auto;
+}
+
+.header-search {
+	order: 3;
+	flex-basis: 100%;
+}
+
+.header-search input {
+	width: 100%;
+	max-width: none;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	border-radius: 0.375rem;
+	background: rgba(var(--color-overlay-rgb), 0.05);
+	color: var(--color-texte);
+}
+
+.header-nav {
+	order: 4;
+	flex-basis: 100%;
+	display: flex;
+	gap: 1.25rem;
+}
+
+.header-nav a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.header-auth {
+	order: 2;
+	margin-left: auto;
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+}
+
+.header-auth a {
+	text-decoration: none;
+	color: inherit;
+}
+
+.button-primary {
+	background: var(--color-vert-troc);
+	color: var(--color-sur-vert-troc) !important;
+	padding: 0.5rem 1rem;
+	border-radius: 0.375rem;
+	transition: background-color 0.15s ease;
+}
+
+/* Réinitialise les styles navigateur par défaut quand .button-primary est posé sur un <button>
+   (ex. formulaires d'auth) plutôt que sur un <a> (ex. header). */
+button.button-primary {
+	border: none;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* États "survol" et "désactivé" de la charte, page "Les boutons". */
+a.button-primary:hover,
+button.button-primary:not(:disabled):hover {
+	background: var(--color-sombre-fixe);
+}
+
+button.button-primary:disabled {
+	background: var(--color-vert-troc-disabled-fond);
+	color: var(--color-vert-troc-disabled-texte) !important;
+	cursor: not-allowed;
+}
+
+.hero {
+	text-align: center;
+	padding: 3rem 1.5rem;
+	background: var(--color-surface);
+}
+
+.hero h1 {
+	margin: 0 0 1.5rem;
+	font-size: 1.75rem;
+}
+
+/* Mobile-first : champs empilés en pleine largeur (grandes zones tactiles). Repasse en ligne
+   à partir de 48rem, cf. media query en bas de fichier. */
+.hero-search {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.hero-search input {
+	width: 100%;
+	padding: 0.6rem 0.9rem;
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	border-radius: 0.375rem;
+	background: rgba(var(--color-overlay-rgb), 0.05);
+	color: var(--color-texte);
+}
+
+/* Le bouton "Rechercher" réutilise .button-primary (couleurs/hover/radius communs) : seul le
+   padding, un peu plus généreux ici pour ce CTA de premier plan, reste spécifique. */
+.hero-search .button-primary {
+	padding: 0.6rem 1.25rem;
+}
+
+.categories,
+.annonces {
+	padding: 2rem 1.5rem;
+	max-width: 72rem;
+	margin: 0 auto;
+}
+
+.categories h2,
+.annonces h2 {
+	margin-top: 0;
+}
+
+.categories-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+	gap: 0.75rem;
+}
+
+.categories-grid a {
+	display: block;
+	padding: 0.75rem 1rem;
+	text-align: center;
+	background: var(--color-surface);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
+	border-radius: 0.5rem;
+	text-decoration: none;
+	color: inherit;
+}
+
+.annonces-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 1rem;
+}
+
+.annonce-card a {
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	background: var(--color-surface);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
+	border-radius: 0.5rem;
+	overflow: hidden;
+	transition: border-color 0.15s ease;
+}
+
+/* État "Survol (hover)" de la charte, page "Les cartes d'annonces" : la bordure passe au vert de
+   marque plutôt que d'ajouter une ombre, pour rester cohérent avec "peu de bordures fortes". */
+.annonce-card a:hover {
+	border-color: var(--color-vert-troc);
+}
+
+/* En attendant de vraies photos d'annonces (upload non branché, voir US05/US06), chaque vignette
+   affiche le visuel générique annonce-placeholder.png. Positionnée en absolute + object-fit: cover
+   pour remplir la boîte (aspect-ratio 4/3) quel que soit son propre ratio ; le flex centré du parent
+   reste utile pour superposer .annonce-badge-vendu par-dessus (l'image, en position absolute, sort
+   du flux et ne le gêne pas). */
+.annonce-photo {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(var(--color-overlay-rgb), 0.08);
+}
+
+.annonce-photo img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Pastille catégorie, page "Les cartes d'annonces" de la charte (ex. "Meubles" en haut à gauche
+   de la photo). */
+.annonce-badge-categorie {
+	position: absolute;
+	top: 0.5rem;
+	left: 0.5rem;
+	z-index: 1;
+	padding: 0.15rem 0.6rem;
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-vert-troc);
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+/* Couleurs fixes (indépendantes du thème), comme --color-sur-vert-troc : le badge doit rester lisible
+   sur l'image placeholder quel que soit le thème clair/sombre actif. */
+.annonce-badge-vendu {
+	position: relative;
+	z-index: 1;
+	padding: 0.15rem 0.5rem;
+	border-radius: 0.25rem;
+	background: var(--color-vendu-fond);
+	color: var(--color-vendu-texte);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+}
+
+.annonce-titre,
+.annonce-prix,
+.annonce-distance {
+	margin: 0.35rem 0.75rem;
+}
+
+.annonce-titre {
+	font-weight: 600;
+}
+
+.annonce-prix {
+	color: var(--color-vert-troc);
+	font-weight: 600;
+}
+
+.annonce-distance {
+	color: var(--color-gris);
+	font-size: 0.875rem;
+	margin-bottom: 0.75rem;
+}
+
+/* Détail d'une annonce (/annonces/[id]) : conteneur pour la galerie + colonne d'infos, et grille des
+   4 vignettes. Nécessaire (pas juste esthétique) : sans lui .annonce-photo (aspect-ratio 4/3) s'étire
+   sur toute la largeur de la page et explose en hauteur. Le reste de la page (fil d'Ariane, colonne
+   d'infos, encart vendeur) reste volontairement en HTML brut, comme /annonces. */
+.annonce-detail {
+	display: grid;
+	gap: 2rem;
+	padding: 1rem 1.5rem 2rem;
+	max-width: 72rem;
+	margin: 0 auto;
+}
+
+.annonce-vignettes {
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 0.5rem;
+}
+
+@media (min-width: 60rem) {
+	.annonce-detail {
+		grid-template-columns: 2fr 1fr;
+		align-items: start;
+	}
+}
+
+/* Pied de page toujours en "Couleur sombre" (charte, page "La navigation" → Footer), y compris en
+   thème clair : contrairement au header/aux cartes, il ne suit pas le thème actif. */
+.site-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	padding: 1.5rem;
+	background: var(--color-pied-fond);
+	color: var(--color-pied-texte);
+}
+
+.site-footer p {
+	margin: 0;
+}
+
+.site-footer nav {
+	display: flex;
+	gap: 1rem;
+}
+
+.site-footer a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* Dépôt d'une annonce (/deposer) : formulaire en carte, même famille visuelle que .auth-card
+   (fond var(--color-surface), champs sur rgba(var(--color-overlay-rgb))). */
+.deposer-main {
+	max-width: 40rem;
+	margin: 0 auto;
+	padding: 2rem 1.5rem 3rem;
+}
+
+.deposer-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	margin-top: 1.5rem;
+	padding: 1.5rem;
+	background: var(--color-surface);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
+	border-radius: 0.75rem;
+}
+
+.deposer-form label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	font-size: 0.9rem;
+}
+
+.deposer-form input[type='text'],
+.deposer-form input[type='number'],
+.deposer-form select,
+.deposer-form textarea {
+	padding: 0.6rem 0.75rem;
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	border-radius: 0.375rem;
+	background: rgba(var(--color-overlay-rgb), 0.05);
+	color: var(--color-texte);
+	font: inherit;
+}
+
+.deposer-form textarea {
+	resize: vertical;
+	min-height: 6rem;
+}
+
+.deposer-row {
+	display: flex;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.deposer-row > label {
+	flex: 1;
+	min-width: 10rem;
+}
+
+.deposer-prix {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.deposer-prix input {
+	flex: 1;
+	min-width: 0;
+}
+
+.deposer-label-photos {
+	display: block;
+	margin-bottom: 0.35rem;
+	font-size: 0.9rem;
+}
+
+/* États "Vide"/"Avec aperçu" de la charte, page "Les champs de formulaire" → Upload photo.
+   <label> plutôt que <div> pour que toute la zone (pas seulement le texte) déclenche le input file. */
+.upload-zone {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 2rem 1rem;
+	border: 2px dashed rgba(var(--color-overlay-rgb), 0.3);
+	border-radius: 0.5rem;
+	color: var(--color-gris);
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.upload-zone.glisse-actif {
+	border-color: var(--color-vert-troc);
+	background: rgba(var(--color-overlay-rgb), 0.05);
+}
+
+.upload-vignettes {
+	list-style: none;
+	margin: 0.75rem 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+	gap: 0.5rem;
+}
+
+.upload-vignettes li {
+	position: relative;
+	aspect-ratio: 1;
+	border-radius: 0.375rem;
+	overflow: hidden;
+}
+
+.upload-vignettes img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.upload-vignettes button {
+	position: absolute;
+	top: 0.25rem;
+	right: 0.25rem;
+	width: 1.5rem;
+	height: 1.5rem;
+	border: none;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.6);
+	color: #fff;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.deposer-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 0.25rem;
+}
+
+/* Bouton "Texte/tertiaire" de la charte, page "Les boutons" (ex. "Annuler") : lien souligné, sans fond. */
+.button-text {
+	color: var(--color-vert-troc);
+	text-decoration: underline;
+	background: none;
+	border: none;
+	font: inherit;
+	padding: 0.5rem 0.25rem;
+	cursor: pointer;
+}
+
+/* Écrans d'authentification (Connexion/Inscription) : en-tête minimal + carte centrée,
+   cf. §Éléments transverses du wireframe. Empilage vertical mobile-first natif ici : la carte est
+   déjà en colonne (display:flex column) et en width:100% jusqu'à sa max-width, donc pas besoin
+   de media query dédiée pour ce bloc. */
+/* Grille à 3 colonnes plutôt qu'un simple flex centré : garde le logo visuellement centré
+   (colonne du milieu) tout en réservant la colonne de droite pour ThemeToggle. */
+.auth-header {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	padding: 1.5rem;
+	background: var(--color-surface);
+}
+
+.auth-header .logo {
+	grid-column: 2;
+}
+
+.auth-header .theme-toggle {
+	grid-column: 3;
+	justify-self: end;
+}
+
+.auth-main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+	padding: 0 1.5rem 3rem;
+}
+
+.auth-card {
+	width: 100%;
+	max-width: 26rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1.5rem;
+	background: var(--color-surface);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
+	border-radius: 0.75rem;
+}
+
+.auth-card h1 {
+	margin: 0 0 0.5rem;
+	font-size: 1.4rem;
+	text-align: center;
+}
+
+.auth-card label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	font-size: 0.9rem;
+}
+
+.auth-card input[type='text'],
+.auth-card input[type='email'],
+.auth-card input[type='password'] {
+	padding: 0.6rem 0.75rem;
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	border-radius: 0.375rem;
+	background: rgba(var(--color-overlay-rgb), 0.05);
+	color: var(--color-texte);
+	font: inherit;
+}
+
+.auth-card .hint {
+	font-size: 0.8rem;
+	color: var(--color-gris);
+}
+
+.auth-card .checkbox {
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.auth-card .checkbox input {
+	width: auto;
+}
+
+.form-error {
+	margin: 0;
+	color: var(--color-erreur);
+	font-size: 0.875rem;
+}
+
+.auth-card .button-primary {
+	width: 100%;
+	padding: 0.75rem 1rem;
+	margin-top: 0.25rem;
+}
+
+.auth-switch {
+	margin: 0;
+	text-align: center;
+	font-size: 0.9rem;
+}
+
+.auth-switch a {
+	color: var(--color-vert-troc);
+}
+
+.auth-back {
+	color: var(--color-gris);
+	text-decoration: none;
+	font-size: 0.9rem;
+}
+
+.auth-back:hover {
+	color: var(--color-texte);
+}
+
+/* Palier desktop : au-delà de 48rem (768px) le header et la recherche du hero repassent sur une
+   seule ligne, l'écran étant assez large pour les 4 blocs du header et les 3 champs de recherche. */
+@media (min-width: 48rem) {
+	.header-search {
+		order: 2;
+		flex-basis: auto;
+		flex: 1;
+	}
+
+	.header-search input {
+		max-width: 24rem;
+	}
+
+	.header-nav {
+		order: 3;
+		flex-basis: auto;
+	}
+
+	.header-auth {
+		order: 4;
+		margin-left: 0;
+	}
+
+	.hero-search {
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.hero-search input[name='q'] {
+		flex: 1;
+		min-width: 16rem;
+		width: auto;
+	}
+
+	.hero-search input[name='codePostal'] {
+		width: 8rem;
+	}
+}
+
+/* Bouton slide clair/sombre (ThemeToggle.svelte). `role="switch"` + `aria-checked` côté composant ;
+   c'est l'attribut aria-checked (pas une classe) qui pilote la position du curseur ici, pour rester
+   la seule source de vérité avec le DOM accessible plutôt que de la dupliquer dans une classe CSS. */
+.theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: inherit;
+}
+
+.theme-toggle-track {
+	position: relative;
+	width: 3rem;
+	height: 1.6rem;
+	border-radius: 999px;
+	background: rgba(var(--color-overlay-rgb), 0.12);
+	border: 1px solid rgba(var(--color-overlay-rgb), 0.25);
+	transition: background-color 0.15s ease;
+}
+
+.theme-toggle-thumb {
+	position: absolute;
+	top: 0.15rem;
+	left: 0.15rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.15rem;
+	height: 1.15rem;
+	border-radius: 50%;
+	background: var(--color-vert-troc);
+	font-size: 0.7rem;
+	line-height: 1;
+	transition: transform 0.15s ease;
+}
+
+.theme-toggle[aria-checked='true'] .theme-toggle-thumb {
+	transform: translateX(1.4rem);
+}
