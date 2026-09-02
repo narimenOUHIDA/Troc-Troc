@@ -260,6 +260,6 @@
       font-size: 0.8rem;
       color: #6b7280;
     }
-    </style>
+ </style>
 
 
