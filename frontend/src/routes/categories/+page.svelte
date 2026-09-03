@@ -60,7 +60,7 @@
 </header>
 
 <main>
-	<nav aria-label="Fil d'Ariane">
+	<nav class="breadcrumb" aria-label="Fil d'Ariane">
 		<a href="/">Accueil</a>
 		/ Catégories
 	</nav>

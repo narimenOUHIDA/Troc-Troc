@@ -1,10 +1,6 @@
 <script>
 	// Écran 3/9 des wireframes : Détail d'une annonce (US11, US12)
 	// — voir docs/conception/troctroc-wireframes.md §1.3
-	//
-	// Même choix que /annonces : pas de CSS dédié pour l'instant. Galerie et annonces similaires
-	// réutilisent les classes déjà stylées (annonce-card, annonce-photo...) ; le reste (fil d'Ariane,
-	// colonne infos, encart vendeur) reste en HTML brut.
 
 	import { page } from '$app/state';
 	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
@@ -66,7 +62,7 @@
 		<p>Cette annonce n'existe pas ou a été supprimée.</p>
 		<a href="/annonces">&larr; Retour à la liste des annonces</a>
 	{:else}
-		<nav aria-label="Fil d'Ariane">
+		<nav class="breadcrumb" aria-label="Fil d'Ariane">
 			<a href="/">Accueil</a>
 			/ <a href="/annonces?categorie={encodeURIComponent(annonce.categorie)}">{annonce.categorie}</a>
 			/ {annonce.titre}
@@ -88,20 +84,20 @@
 			</section>
 
 			<!-- Colonne droite : infos annonce, encart vendeur, action de contact. -->
-			<aside aria-label="Informations sur l'annonce">
-				<p>{annonce.categorie}</p>
+			<aside class="annonce-infos" aria-label="Informations sur l'annonce">
+				<p class="annonce-infos-categorie">{annonce.categorie}</p>
 				<h1>{annonce.titre}</h1>
-				<p>{annonce.prix} €</p>
-				<p>{annonce.ville} {annonce.codePostal} · à {annonce.distanceKm} km</p>
-				<p>Publiée le {formaterDate(annonce.datePublication)}</p>
+				<p class="annonce-infos-prix">{annonce.prix} €</p>
+				<p class="annonce-infos-meta">{annonce.ville} {annonce.codePostal} · à {annonce.distanceKm} km</p>
+				<p class="annonce-infos-meta">Publiée le {formaterDate(annonce.datePublication)}</p>
 
 				{#if annonce.statut === 'vendu'}
-					<p><strong>Vendu</strong></p>
+					<p class="annonce-infos-vendu"><strong>Vendu</strong></p>
 				{/if}
 
-				<div>
-					<p>{annonce.vendeur.nom}</p>
-					<p>Membre depuis {annonce.vendeur.membreDepuis} · {annonce.vendeur.nbAnnonces} annonces</p>
+				<div class="annonce-vendeur">
+					<p class="annonce-vendeur-nom">{annonce.vendeur.nom}</p>
+					<p class="annonce-vendeur-meta">Membre depuis {annonce.vendeur.membreDepuis} · {annonce.vendeur.nbAnnonces} annonces</p>
 				</div>
 
 				<button

@@ -1,10 +1,6 @@
 <script>
 	// Écran 2/9 des wireframes : Liste des annonces (US07, US08, US09, US10)
 	// — voir docs/conception/troctroc-wireframes.md §1.2
-	//
-	// Demande explicite : pas de CSS dédié pour l'instant. Seules les classes déjà stylées par
-	// l'accueil (site-header, site-footer, annonces-grid, annonce-card...) sont réutilisées pour
-	// garder les mêmes cartes ; fil d'Ariane, filtres, tri et pagination restent en HTML brut.
 
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
@@ -106,14 +102,14 @@
 </header>
 
 <main>
-	<nav aria-label="Fil d'Ariane">
+	<nav class="breadcrumb" aria-label="Fil d'Ariane">
 		<a href="/">Accueil</a>
 		/ {recherche ? `Résultats pour « ${recherche} »` : 'Liste des annonces'}
 	</nav>
 
-	<div>
+	<div class="annonces-layout">
 		<!-- Panneau de filtres (US08 catégorie, US09 rayon/code postal, US10 prix). -->
-		<aside aria-label="Filtres">
+		<aside class="filtres" aria-label="Filtres">
 			<h2>Filtres</h2>
 
 			<fieldset>
@@ -145,10 +141,10 @@
 			<fieldset>
 				<legend>Rayon</legend>
 				<input type="range" name="rayon" min="5" max="50" step="5" bind:value={rayonKm} />
-				<span>{rayonKm} km</span>
+				<span class="filtres-valeur">{rayonKm} km</span>
 			</fieldset>
 
-			<fieldset>
+			<fieldset class="filtres-prix">
 				<legend>Prix</legend>
 				<label>
 					Min
@@ -163,7 +159,7 @@
 
 		<!-- Résultats (US07). -->
 		<section aria-label="Résultats">
-			<div>
+			<div class="resultats-header">
 				<p>{annoncesTriees.length} annonce{annoncesTriees.length > 1 ? 's' : ''} trouvée{annoncesTriees.length > 1 ? 's' : ''}</p>
 
 				<label>
@@ -201,7 +197,7 @@
 
 				<!-- Pagination : `nbPages` grandit si le mock ou les filtres changent, contrairement au
 				     "1 2 3 … 8" figé du wireframe (24 annonces fixes ici, donc jamais > 3 pages en pratique). -->
-				<nav aria-label="Pagination">
+				<nav class="pagination" aria-label="Pagination">
 					<button type="button" disabled={pageCourante === 1} onclick={() => (pageCourante -= 1)}>
 						&lsaquo;
 					</button>
