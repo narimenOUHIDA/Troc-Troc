@@ -1,5 +1,5 @@
 'use strict';
-
+const Message = require('./Message'); // import du modèle message
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
@@ -40,4 +40,9 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-module.exports = db;
+db.Message = Message; // Ajout du modèle Message à l'objet db
+
+module.exports = {
+  // ... garde les autres modèles deja présent ( User, Ad, etc.)
+  Message
+}
