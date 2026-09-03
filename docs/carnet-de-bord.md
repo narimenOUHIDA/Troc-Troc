@@ -85,3 +85,21 @@ Suivi au fil de l'eau du travail réalisé sur le projet, par l'équipe (Narimen
 - Les liens `/categories`, `/connexion`, `/cgu`, `/a-propos`, `/contact` pointent vers des pages qui n'existent pas encore côté frontend
 
 **À suivre** : renommer `nouvelle-branch` selon la fonctionnalité à développer, créer les pages manquantes (Connexion, Catégories, CGU, À propos, Contact).
+
+## Jeudi 3 septembre 2026
+
+**Objectif** : combler un des liens morts repérés la veille en créant la page Catégories.
+
+**Travail réalisé** (Chris, branche `nouvelle-branch`) :
+
+- Construction de l'écran Catégories (`frontend/src/routes/categories/+page.svelte`) : grille de toutes les catégories avec le nombre d'annonces par catégorie, chaque tuile renvoyant vers `/annonces?categorie=...` (même comportement que les tuiles de l'accueil)
+- Réutilisation des données mockées (`categories`, `annonces` de `$lib/annonces.js`) et des classes déjà stylées (`.categories`, `.categories-grid` d'`app.css`) plutôt que de dupliquer du CSS, en suivant le même header/pied de page/fil d'Ariane que les autres écrans
+- Vérification : `npm run check` (aucune nouvelle erreur introduite) et rendu manuel via le serveur de dev
+
+**Points de vigilance** :
+
+- Le nombre d'annonces par catégorie est calculé sur tout le catalogue mocké (disponibles + vendues) ; à revoir une fois `GET /categories` disponible côté API.
+- `nouvelle-branch` toujours pas renommée.
+- Liens `/connexion`, `/cgu`, `/a-propos`, `/contact` toujours morts.
+
+**À suivre** : renommer `nouvelle-branch`, créer les pages Connexion, CGU, À propos, Contact.
