@@ -31,7 +31,7 @@ class AuthController {
                 lastName,
                 firstName,
                 email,
-                password: hashedPassword,
+                password: hachedPassword,
                 registrationDate: new Date(),
                 postalCodeId
             });
@@ -39,23 +39,74 @@ class AuthController {
             // 201 -> ressource created
             res.status(201).json({
                 id: newUser.id,
+                lastName: newUser.lastName,
+                firstName: newUser.firstName,
                 email: newUser.email,
+                registrationDate: newUser.registrationDate,
+                postalCodeId: newUser.postalCodeId,
             });
 
         } catch (error) {
             // attrape toutes les erreurs dans la fonction
             console.log(error.message);
+
+            if (error instanceof HttpError) throw error;
             // lancer une erreur qui sera gérée par le errorController
             throw new HttpError("Failed create user", 400);
         }
     };
 
     login = async (req, res, next) => {
+        try {
+            const { email, password } = req.body;
 
+            // 1. vérifier si l'utilisateur existe dans la BDD (chercher par son email)
+            const foundUser = await User.findOne({ where: { email } });
+            if (!foundUser) {
+                throw new HttpError("user not found", 401);
+            }
+
+            // 2. vérifier si son password est valide (correspondance entre son password et le hash stocké en BDD)
+            if (!(await argon2.verify(foundUser.password, password))) {
+                throw new HttpError("Invalid credentials", 401)
+            }
+
+            // 3. calculer un token JWT
+            const token = jwt.sign(
+                { user_id: foundUser.id },
+                process.env.JWT_SECRET,
+                { expiresIn: "2h" },
+            );
+
+            res.status(200).json({
+                token,
+                user: {
+                    id: foundUser.id,
+                    firstName: foundUser.firstName,
+                    lastName: foundUser.lastName,
+                    email: foundUser.email,
+                }
+            })
+
+        } catch (error) {
+            console.log(error.message);
+            if (error instanceof HttpError) throw error;
+            throw new HttpError("Failed to login", 401); //unauthorized
+        }
     };
 
     getMe = async (req, res, next) => {
+        try {
+            res.status(200).json({
+                id: req.user.id,
+                firstName: req.user.firstName,
+                lastName: req.user.lastName,
+                email: req.user.email,
+            })
 
+        } catch (error) {
+            throw new HttpError("user not founnded", 404)
+        }
     };
 }
 

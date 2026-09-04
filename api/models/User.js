@@ -23,7 +23,6 @@ const User = sequelize.define(
         },
         registrationDate: {
             type: DataTypes.DATE,
-            allowNull: false,
             defaultValue: DataTypes.NOW,
         },
         postalCodeId: {
