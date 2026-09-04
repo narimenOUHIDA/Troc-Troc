@@ -743,6 +743,29 @@ a.button-accent:hover {
 	gap: 0.5rem;
 }
 
+/* Vignette cliquable (change la photo principale) : réinitialise les styles <button>, puis réutilise
+   .annonce-photo pour la mise en forme (aspect-ratio, object-fit) — seule la bordure de sélection
+   change entre l'état actif et inactif, pour éviter tout décalage de mise en page. */
+.annonce-vignette-bouton {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: 0.375rem;
+	background: none;
+	font: inherit;
+	cursor: pointer;
+	transition: border-color 0.15s ease;
+}
+
+.annonce-vignette-bouton:hover {
+	border-color: rgba(var(--color-overlay-rgb), 0.3);
+}
+
+.annonce-vignette-bouton.active {
+	border-color: var(--color-vert-troc);
+}
+
 .annonce-detail h2 {
 	margin: 1.5rem 0 0.5rem;
 }

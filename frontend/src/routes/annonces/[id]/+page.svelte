@@ -13,6 +13,17 @@
 	let annonce = $derived(trouverAnnonce(page.params.id));
 	let similaires = $derived(annonce ? annoncesSimilaires(annonce) : []);
 
+	// Galerie : photo principale + vignettes cliquables, à partir des vraies photos de l'annonce
+	// (au lieu du visuel générique répété 4 fois). Repart sur la première photo à chaque nouvelle
+	// annonce (le composant étant réutilisé d'une annonce à l'autre, voir le commentaire ci-dessus).
+	let photos = $derived(annonce?.photos?.length ? annonce.photos : [photoPlaceholder]);
+	let indexPhotoActive = $state(0);
+
+	$effect(() => {
+		annonce?.id;
+		indexPhotoActive = 0;
+	});
+
 	const formateurDate = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 	/**
@@ -53,13 +64,26 @@
 		<div class="annonce-detail">
 			<!-- Colonne gauche : galerie (photo principale + vignettes) et description. -->
 			<section aria-label="Photos de l'annonce">
-				<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
+				<div class="annonce-photo" aria-hidden="true"><img src={photos[indexPhotoActive]} alt="" /></div>
 
-				<ul class="annonce-vignettes">
-					{#each Array(4) as _, i (i)}
-						<li class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></li>
-					{/each}
-				</ul>
+				{#if photos.length > 1}
+					<ul class="annonce-vignettes">
+						{#each photos as photo, i (i)}
+							<li>
+								<button
+									type="button"
+									class="annonce-photo annonce-vignette-bouton"
+									class:active={i === indexPhotoActive}
+									onclick={() => (indexPhotoActive = i)}
+									aria-label="Voir la photo {i + 1} sur {photos.length}"
+									aria-current={i === indexPhotoActive}
+								>
+									<img src={photo} alt="" />
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 
 				<h2>Description</h2>
 				<p>{annonce.description}</p>
