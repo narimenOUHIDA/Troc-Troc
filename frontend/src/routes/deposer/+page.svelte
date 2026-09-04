@@ -4,12 +4,11 @@
 	//
 	// En-tête "visiteur" par défaut (comme le reste du site) plutôt que la variante "connectée" du
 	// wireframe : il n'y a pas encore de session utilisateur (voir /connexion, non implémentée), donc
-	// rien à afficher côté avatar/messagerie pour l'instant.
+	// rien à afficher côté avatar/messagerie pour l'instant (voir Header.svelte).
 
 	import { onDestroy } from 'svelte';
 	import { categories } from '$lib/annonces.js';
-	import ThemeToggle from '$lib/ThemeToggle.svelte';
-	import Logo from '$lib/Logo.svelte';
+	import Header from '$lib/Header.svelte';
 
 	let titre = $state('');
 	let description = $state('');
@@ -76,25 +75,7 @@
 	<title>TrocTroc — Déposer une annonce</title>
 </svelte:head>
 
-<header class="site-header">
-	<a class="logo" href="/"><Logo /></a>
-
-	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
-		<input type="search" name="q" placeholder="Rechercher un article..." aria-label="Rechercher un article" />
-	</form>
-
-	<nav class="header-nav" aria-label="Navigation principale">
-		<a href="/categories">Catégories</a>
-		<a href="/deposer">Déposer une annonce</a>
-		<a href="/messages">Messagerie</a>
-	</nav>
-
-	<div class="header-auth">
-		<ThemeToggle />
-		<a href="/connexion">Connexion</a>
-		<a class="button-primary" href="/inscription">S'inscrire</a>
-	</div>
-</header>
+<Header connecte={false} />
 
 <main class="deposer-main">
 	<h1>Déposer une annonce</h1>

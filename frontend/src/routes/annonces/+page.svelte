@@ -5,8 +5,8 @@
 	import { page } from '$app/state';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories as categoriesDisponibles, annonces as toutesLesAnnonces } from '$lib/annonces.js';
-	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
 	import Logo from '$lib/Logo.svelte';
+	import AnnonceCard from '$lib/AnnonceCard.svelte';
 
 	// Filtres pré-remplis depuis l'URL (tuile catégorie de l'accueil, ou recherche mots-clés/code postal).
 	const categorieUrl = page.url.searchParams.get('categorie');
@@ -79,10 +79,17 @@
 	<title>TrocTroc — Liste des annonces</title>
 </svelte:head>
 
+<!-- En-tête "visiteur" comme Header.svelte, sauf la recherche : ici elle reste liée en direct
+     (bind:value) pour filtrer la page courante, plutôt que de soumettre en GET vers /annonces
+     (on y est déjà). -->
 <header class="site-header">
 	<a class="logo" href="/"><Logo /></a>
 
 	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
+		<svg class="header-search-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+			<circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5" />
+			<line x1="13.5" y1="13.5" x2="18" y2="18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+		</svg>
 		<input
 			type="search"
 			name="q"
@@ -93,14 +100,14 @@
 	</form>
 
 	<nav class="header-nav" aria-label="Navigation principale">
+		<a href="/">Accueil</a>
 		<a href="/categories">Catégories</a>
-		<a href="/deposer">Déposer une annonce</a>
-		<a href="/messages">Messagerie</a>
+		<a href="/comment-ca-marche">Comment ça marche</a>
 	</nav>
 
 	<div class="header-auth">
 		<ThemeToggle />
-		<a href="/connexion">Connexion</a>
+		<a class="button-secondary" href="/connexion">Se connecter</a>
 		<a class="button-primary" href="/inscription">S'inscrire</a>
 	</div>
 </header>
@@ -182,20 +189,7 @@
 			{:else}
 				<ul class="annonces-grid">
 					{#each annoncesPage as annonce (annonce.id)}
-						<li class="annonce-card">
-							<a href="/annonces/{annonce.id}">
-								<div class="annonce-photo" aria-hidden="true">
-									<img src={photoPlaceholder} alt="" />
-									<span class="annonce-badge-categorie">{annonce.categorie}</span>
-									{#if annonce.statut === 'vendu'}
-										<span class="annonce-badge-vendu">VENDU</span>
-									{/if}
-								</div>
-								<p class="annonce-titre">{annonce.titre}</p>
-								<p class="annonce-prix">{annonce.prix} €</p>
-								<p class="annonce-distance">{annonce.distanceKm} km</p>
-							</a>
-						</li>
+						<AnnonceCard {annonce} />
 					{/each}
 				</ul>
 

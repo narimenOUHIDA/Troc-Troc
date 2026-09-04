@@ -4,9 +4,9 @@
 
 	import { page } from '$app/state';
 	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
-	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
-	import Logo from '$lib/Logo.svelte';
+	import Header from '$lib/Header.svelte';
+	import AnnonceCard from '$lib/AnnonceCard.svelte';
 
 	// $derived (pas juste lu une fois) : reste correct si on navigue d'une annonce à une autre sans
 	// démonter le composant (ex. clic sur une annonce similaire, SvelteKit réutilise la même page).
@@ -37,25 +37,7 @@
 	<title>{annonce ? `TrocTroc — ${annonce.titre}` : 'TrocTroc — Annonce introuvable'}</title>
 </svelte:head>
 
-<header class="site-header">
-	<a class="logo" href="/"><Logo /></a>
-
-	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
-		<input type="search" name="q" placeholder="Rechercher un article..." aria-label="Rechercher un article" />
-	</form>
-
-	<nav class="header-nav" aria-label="Navigation principale">
-		<a href="/categories">Catégories</a>
-		<a href="/deposer">Déposer une annonce</a>
-		<a href="/messages">Messagerie</a>
-	</nav>
-
-	<div class="header-auth">
-		<ThemeToggle />
-		<a href="/connexion">Connexion</a>
-		<a class="button-primary" href="/inscription">S'inscrire</a>
-	</div>
-</header>
+<Header connecte={false} />
 
 <main>
 	{#if !annonce}
@@ -116,20 +98,7 @@
 				<h2>Annonces similaires</h2>
 				<ul class="annonces-grid">
 					{#each similaires as annonceSimilaire (annonceSimilaire.id)}
-						<li class="annonce-card">
-							<a href="/annonces/{annonceSimilaire.id}">
-								<div class="annonce-photo" aria-hidden="true">
-									<img src={photoPlaceholder} alt="" />
-									<span class="annonce-badge-categorie">{annonceSimilaire.categorie}</span>
-									{#if annonceSimilaire.statut === 'vendu'}
-										<span class="annonce-badge-vendu">VENDU</span>
-									{/if}
-								</div>
-								<p class="annonce-titre">{annonceSimilaire.titre}</p>
-								<p class="annonce-prix">{annonceSimilaire.prix} €</p>
-								<p class="annonce-distance">{annonceSimilaire.distanceKm} km</p>
-							</a>
-						</li>
+						<AnnonceCard annonce={annonceSimilaire} />
 					{/each}
 				</ul>
 			</section>
