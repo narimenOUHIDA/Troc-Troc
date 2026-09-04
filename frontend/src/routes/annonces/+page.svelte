@@ -48,8 +48,12 @@
 			if (categoriesSelectionnees.length > 0 && !categoriesSelectionnees.includes(annonce.categorie)) {
 				return false;
 			}
-			if (recherche.trim() && !annonce.titre.toLowerCase().includes(recherche.trim().toLowerCase())) {
-				return false;
+			if (recherche.trim()) {
+				const motsCles = recherche.trim().toLowerCase();
+				const correspond =
+					annonce.titre.toLowerCase().includes(motsCles) ||
+					annonce.description.toLowerCase().includes(motsCles);
+				if (!correspond) return false;
 			}
 			if (prixMin !== '' && annonce.prix < Number(prixMin)) return false;
 			if (prixMax !== '' && annonce.prix > Number(prixMax)) return false;

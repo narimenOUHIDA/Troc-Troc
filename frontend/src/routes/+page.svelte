@@ -13,34 +13,9 @@
 	const idsDernieresAnnonces = [1, 4, 7, 5, 10, 6, 13, 16];
 	const dernieresAnnonces = idsDernieresAnnonces.map((id) => trouverAnnonce(id));
 
-	// Champs du formulaire de recherche du bloc d'accroche (hero), liés avec bind:value.
-	let recherche = $state('');
-	let codePostal = $state('');
-
-	// Champ de la barre de recherche du header (présente sur tout le site, cf. app.css .header-search).
-	let rechercheHeader = $state('');
-
-	/**
-	 * Recherche du bloc d'accroche (mots-clés + code postal).
-	 * Empêche le rechargement natif du formulaire tant qu'il n'y a pas de route /annonces à interroger.
-	 * @param {SubmitEvent} event
-	 */
-	function onRechercher(event) {
-		event.preventDefault();
-		// Placeholder en attendant la route /annonces (recherche + filtre géographique) et la navigation vers /annonces.
-		console.log('[accueil] recherche (hero)', { recherche, codePostal });
-	}
-
-	/**
-	 * Recherche rapide du header (mots-clés seuls, pas de code postal).
-	 * Sans ce handler, la soumission du formulaire déclencherait un GET natif vers la page courante
-	 * (rechargement complet) puisque le <form> n'a pas d'attribut action.
-	 * @param {SubmitEvent} event
-	 */
-	function onRechercherHeader(event) {
-		event.preventDefault();
-		console.log('[accueil] recherche (header)', { rechercheHeader });
-	}
+	// Les deux formulaires de recherche (header + hero) soumettent en GET vers /annonces,
+	// qui lit déjà q/codePostal depuis l'URL (voir routes/annonces/+page.svelte) : pas besoin
+	// de gérer la navigation en JS, le comportement natif du <form> suffit.
 </script>
 
 <svelte:head>
@@ -53,13 +28,12 @@
 <header class="site-header">
 	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
 
-	<form class="header-search" role="search" onsubmit={onRechercherHeader}>
+	<form class="header-search" role="search" method="GET" action="/annonces">
 		<input
 			type="search"
 			name="q"
 			placeholder="Rechercher un article..."
 			aria-label="Rechercher un article"
-			bind:value={rechercheHeader}
 		/>
 	</form>
 
@@ -82,13 +56,12 @@
 	<section class="hero">
 		<h1>Achetez, vendez et échangez près de chez vous</h1>
 
-		<form class="hero-search" onsubmit={onRechercher}>
+		<form class="hero-search" method="GET" action="/annonces">
 			<input
 				type="text"
 				name="q"
 				placeholder="Ex. vélo, canapé, console..."
 				aria-label="Mots-clés"
-				bind:value={recherche}
 			/>
 			<input
 				type="text"
@@ -97,7 +70,6 @@
 				aria-label="Code postal"
 				inputmode="numeric"
 				maxlength="5"
-				bind:value={codePostal}
 			/>
 			<button type="submit" class="button-primary">Rechercher</button>
 		</form>
