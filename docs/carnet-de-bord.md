@@ -103,3 +103,24 @@ Suivi au fil de l'eau du travail réalisé sur le projet, par l'équipe (Narimen
 - Liens `/connexion`, `/cgu`, `/a-propos`, `/contact` toujours morts.
 
 **À suivre** : renommer `nouvelle-branch`, créer les pages Connexion, CGU, À propos, Contact.
+
+## Vendredi 4 septembre 2026
+
+**Objectif** : dockeriser l'api et le frontend, relier les barres de recherche à la liste des annonces, et mettre à jour le logo selon la charte graphique.
+
+**Travail réalisé** (Chris, branche `feat/page-categories`) :
+
+- Dockerisation de l'api et du frontend (`feat: dockeriser l'api et le frontend`) : `Dockerfile` pour chacun, `docker-compose.yml` étendu avec les services `api`/`frontend` en plus de `postgres` (hot-reload via volumes montés, `DB_HOST=postgres` côté conteneur api pour joindre postgres par son nom de service) ; port Postgres exposé sur l'hôte remappé en `5434` pour éviter un conflit avec une instance PostgreSQL locale déjà installée sur la machine de dev
+- Correction du script `dev` de `api/package.json`, qui pointait vers un `index.js` inexistant au lieu de `app.js` (bloquait le démarrage du conteneur api)
+- `api/.env.example` réaligné sur les variables réellement lues par `sequelize-client.js` (`DB_HOST`/`DB_PORT`/`DB_NAME`/`DB_USER`/`DB_PASSWORD`, suppression de `DATABASE_URL` qui n'était pas utilisée)
+- Barres de recherche des articles (`feat(frontend): brancher les barres de recherche vers /annonces`) : les formulaires de recherche (header et bandeau d'accueil) ne faisaient qu'un `console.log` au submit ; ils soumettent désormais en GET vers `/annonces?q=...&codePostal=...`, que la page lisait déjà depuis l'URL
+- Recherche par mots-clés sur `/annonces` étendue au titre **et** à la description (ne portait que sur le titre)
+- Remplacement du logo (`feat(frontend): remplacer le logo par la version avec baseline de la charte`) : nouveau composant `frontend/src/lib/Logo.svelte` (texte, pas une image) reprenant la variante de la charte graphique avec la baseline "achat . vente . échange" en dessous, mobile-first (compact par défaut, agrandi à partir de 768px), sans fond dédié derrière (couleurs qui suivent désormais le thème clair/sombre au lieu d'être fixes)
+
+**Points de vigilance** :
+
+- `package.json` (racine) référence toujours un workspace `backend` dans `workspaces: [...]` alors que le dossier s'appelle `api` — ses dépendances ne sont donc pas installées via `npm install` à la racine (contourné pour Docker en installant directement depuis `api/package.json`, mais reste à corriger)
+- `api/migrations/dataset.json` (données de seed) est vide — `npm run db:seed` échouera tant qu'il n'est pas renseigné
+- Une API de recherche/filtre côté backend (`GET /api/v1/annonces`, avec filtre par rayon de 50 km autour d'un code postal) a été développée et testée en local mais volontairement laissée de côté, non committée à ce stade
+
+**À suivre** : reprendre et committer l'API de recherche backend, renseigner `api/migrations/dataset.json`, corriger le workspace `backend` → `api` du `package.json` racine.
