@@ -5,7 +5,7 @@
 
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories, annonces } from '$lib/annonces.js';
-	import logo from '$lib/assets/logo-mobile.png';
+	import Logo from '$lib/Logo.svelte';
 
 	let recherche = $state('');
 
@@ -34,7 +34,7 @@
 </svelte:head>
 
 <header class="site-header">
-	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
+	<a class="logo" href="/"><Logo /></a>
 
 	<form class="header-search" role="search" onsubmit={onRechercherHeader}>
 		<input

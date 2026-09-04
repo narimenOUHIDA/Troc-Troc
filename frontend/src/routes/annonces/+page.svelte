@@ -6,7 +6,7 @@
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import { categories as categoriesDisponibles, annonces as toutesLesAnnonces } from '$lib/annonces.js';
 	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
-	import logo from '$lib/assets/logo-mobile.png';
+	import Logo from '$lib/Logo.svelte';
 
 	// Filtres pré-remplis depuis l'URL (tuile catégorie de l'accueil, ou recherche mots-clés/code postal).
 	const categorieUrl = page.url.searchParams.get('categorie');
@@ -80,7 +80,7 @@
 </svelte:head>
 
 <header class="site-header">
-	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
+	<a class="logo" href="/"><Logo /></a>
 
 	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
 		<input

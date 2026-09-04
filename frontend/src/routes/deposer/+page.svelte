@@ -9,7 +9,7 @@
 	import { onDestroy } from 'svelte';
 	import { categories } from '$lib/annonces.js';
 	import ThemeToggle from '$lib/ThemeToggle.svelte';
-	import logo from '$lib/assets/logo-mobile.png';
+	import Logo from '$lib/Logo.svelte';
 
 	let titre = $state('');
 	let description = $state('');
@@ -77,7 +77,7 @@
 </svelte:head>
 
 <header class="site-header">
-	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
+	<a class="logo" href="/"><Logo /></a>
 
 	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
 		<input type="search" name="q" placeholder="Rechercher un article..." aria-label="Rechercher un article" />

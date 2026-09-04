@@ -21,10 +21,6 @@
 	/* Texte sur un fond --color-vert-troc (bouton principal) : toujours blanc, quel que soit le thème
 	   (mesuré sur la charte, page "Les boutons"). */
 	--color-sur-vert-troc: #ffffff;
-	/* Fond fixe (indépendant du thème) sous le logo image (logo-mobile.png) : ses couleurs (vert très
-	   foncé + vert moyen) sont conçues pour un fond clair et deviendraient illisibles sur l'en-tête du
-	   thème sombre sans cette pastille claire constante. */
-	--color-logo-fond: #f7f5ef;
 	/* Couleurs fixes (indépendantes du thème) : usages où la charte impose une teinte précise plutôt
 	   que de suivre le thème actif. */
 	--color-sombre-fixe: #19352b; /* survol des boutons primaires, fond du pied de page */
@@ -146,15 +142,53 @@ button:focus-visible {
 	align-items: center;
 	text-decoration: none;
 	color: inherit;
-	background: var(--color-logo-fond);
-	padding: 0.35rem 0.75rem;
-	border-radius: 0.5rem;
 }
 
-.logo img {
-	display: block;
-	height: 1.5rem;
-	width: auto;
+/* Mobile-first : wordmark compact + baseline en dessous (charte, variante "Desktop" avec écriture
+   en dessous — voir Logo.svelte). Pas de fond dédié : le logo est posé directement sur le fond du
+   header (--color-surface), donc --color-wordmark-sombre et --color-tagline suivent le thème plutôt
+   que des couleurs fixes, comme le reste de la charte sur fond variable (ex. .annonce-prix). */
+.logo-mark {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	line-height: 1;
+}
+
+.logo-wordmark {
+	font-family:
+		'Poppins',
+		system-ui,
+		sans-serif;
+	font-weight: 700;
+	font-size: 1.15rem;
+	letter-spacing: -0.01em;
+	border-bottom: 2px solid var(--color-accent);
+	padding-bottom: 0.15rem;
+}
+
+.logo-wordmark-sombre {
+	color: var(--color-texte);
+}
+
+.logo-wordmark-accent {
+	color: var(--color-vert-troc);
+}
+
+.logo-tagline {
+	font-size: 0.65rem;
+	letter-spacing: 0.03em;
+	color: var(--color-gris);
+}
+
+@media (min-width: 48rem) {
+	.logo-wordmark {
+		font-size: 1.4rem;
+	}
+
+	.logo-tagline {
+		font-size: 0.75rem;
+	}
 }
 
 .header-search {
