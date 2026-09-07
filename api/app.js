@@ -5,6 +5,9 @@ import cors from "cors";
 // On importe notre package express
 import express from 'express';
 
+import listingsRouter from './routes/listings.routes.js';
+import conversationsRouter from './routes/conversations.routes.js';
+
 // Import local modules
 import authRouter from './routes/auth.router.js';
 
@@ -25,6 +28,8 @@ app.use(express.json());
 app.use(cors({ origin: 'http://localhost:5173' }));
 
 app.use(authRouter);
+app.use('/api/v1/annonces', listingsRouter);
+app.use('/api/v1/conversations', conversationsRouter);
 
 // Route par défaut si aucune route n'a été trouvée
 app.use(errorController.route404);
