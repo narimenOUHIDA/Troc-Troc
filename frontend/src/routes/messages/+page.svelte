@@ -1,84 +1,81 @@
 
 <script>
+	import { onMount } from 'svelte';
+	import { api } from '$lib/api.js';
+
+	// Pas encore de session/authentification connectée côté frontend (voir inscription/+page.svelte,
+	// qui ne fait pas non plus d'appel API) : on simule l'utilisateur connecté en attendant un vrai
+	// login. Le backend accepte lui aussi userId en clair pour la même raison (feat/auth-api pas
+	// encore branchée sur ces routes), voir api/controllers/conversations.controller.js.
+	const CURRENT_USER_ID = 1;
+
 	let searchInput = $state('');
 	let newMessage = $state('');
-	let activeId = $state(1);
+	let activeId = $state(null);
+	let conversations = $state([]);
+	let chargement = $state(true);
+	let erreur = $state(null);
 
-	let conversations = $state([
-		{
-			id: 1,
-			nom: 'Julie D.',
-			avatar: 'J',
-			annonce: 'Canapé 3 places en tissu gris',
-			prix: '120 €',
-			dernierMsg: 'Bonjour, il est toujours dispo ?',
-			heure: '10:12',
-			nonLu: 2,
-			enLigne: true,
-			messages: [
-				{
-					id: 1,
-					texte: 'Bonjour, il est toujours disponible ?',
-					heure: '10:08',
-					type: 'recu'
-				},
-				{
-					id: 2,
-					texte: 'Oui toujours disponible !',
-					heure: '10:15',
-					type: 'envoye'
-				},
-				{
-					id: 3,
-					texte: 'Super, je peux passer le récupérer ce soir ?',
-					heure: '10:22',
-					type: 'recu'
-				},
-				{
-					id: 4,
-					texte: 'Avec plaisir, vers 19h ?',
-					heure: '10:25',
-					type: 'envoye'
-				}
-			]
-		},
-		{
-			id: 2,
-			nom: 'Marc T.',
-			avatar: 'M',
-			annonce: 'Vélo enfant 20 pouces',
-			prix: '45 €',
-			dernierMsg: 'Vous : Oui, je peux le garder',
-			heure: 'Hier',
-			nonLu: 0,
+	const formateurHeure = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
+	const formateurDate = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' });
+
+	/**
+	 * @param {string} dateIso
+	 */
+	function formaterHeure(dateIso) {
+		const date = new Date(dateIso);
+		const memeJour = date.toDateString() === new Date().toDateString();
+		return memeJour ? formateurHeure.format(date) : formateurDate.format(date);
+	}
+
+	/**
+	 * @param {{ users?: {id: number, firstName: string, lastName: string}[] }} conversation
+	 */
+	function autreParticipant(conversation) {
+		return conversation.users?.find((u) => u.id !== CURRENT_USER_ID) ?? null;
+	}
+
+	/**
+	 * @param {{firstName: string, lastName: string} | null} personne
+	 */
+	function initiales(personne) {
+		if (!personne) return '?';
+		return `${personne.firstName?.[0] ?? ''}${personne.lastName?.[0] ?? ''}`.toUpperCase();
+	}
+
+	/**
+	 * Traduit une conversation reçue de l'API vers la forme attendue par le template.
+	 * @param {object} conv
+	 */
+	function mapConversation(conv) {
+		const contact = autreParticipant(conv);
+		const dernierMessage = conv.messages?.[0];
+
+		return {
+			id: conv.id,
+			nom: contact ? `${contact.firstName} ${contact.lastName}` : 'Utilisateur',
+			avatar: initiales(contact),
+			annonce: conv.listing?.title ?? '',
+			prix: conv.listing?.price != null ? `${Number(conv.listing.price)} €` : '',
+			dernierMsg: dernierMessage ? dernierMessage.content : 'Démarrez la conversation',
+			heure: formaterHeure(dernierMessage ? dernierMessage.sentAt : conv.creationDate),
+			nonLu: conv.unreadCount ?? 0,
 			enLigne: false,
 			messages: []
-		},
-		{
-			id: 3,
-			nom: 'Sophie L.',
-			avatar: 'S',
-			annonce: 'Table basse en bois',
-			prix: '30 €',
-			dernierMsg: 'Parfait, à demain alors !',
-			heure: 'Lun',
-			nonLu: 0,
-			enLigne: false,
-			messages: []
-		},
-		{
-			id: 4,
-			nom: 'Ahmed B.',
-			avatar: 'A',
-			annonce: 'Console de jeux rétro',
-			prix: '80 €',
-			dernierMsg: 'Est-ce que la manette est incluse ...',
-			heure: '22 août',
-			nonLu: 1,
-			enLigne: false,
-			messages: []
+		};
+	}
+
+	onMount(async () => {
+		try {
+			const { data } = await api.get(`/api/v1/conversations?userId=${CURRENT_USER_ID}`);
+			conversations = data.map(mapConversation);
+		} catch (err) {
+			console.error('[messages] impossible de charger les conversations', err);
+			erreur = err;
+		} finally {
+			chargement = false;
 		}
-	]);
+	});
 
 	// Conversation actuellement sélectionnée
 	let activeConv = $derived(
@@ -92,52 +89,63 @@
 		)
 	);
 
-	function selectionnerConversation(id) {
+	async function selectionnerConversation(id) {
 		activeId = id;
 
-		const conversation = conversations.find(
-			(conv) => conv.id === id
-		);
+		const conversation = conversations.find((conv) => conv.id === id);
 
-		if (conversation) {
-			conversation.nonLu = 0;
+		if (!conversation) {
+			return;
+		}
+
+		conversation.nonLu = 0;
+
+		try {
+			const { data } = await api.get(`/api/v1/conversations/${id}?userId=${CURRENT_USER_ID}`);
+			conversation.messages = (data.messages ?? []).map((msg) => ({
+				id: msg.id,
+				texte: msg.content,
+				heure: formaterHeure(msg.sentAt),
+				type: msg.userId === CURRENT_USER_ID ? 'envoye' : 'recu'
+			}));
+		} catch (err) {
+			console.error('[messages] impossible de charger la conversation', err);
 		}
 	}
 
-	function envoyerMessage() {
+	async function envoyerMessage() {
 		const texte = newMessage.trim();
 
 		if (!texte || !activeConv) {
 			return;
 		}
 
-		const maintenant = new Date();
+		newMessage = '';
 
-		const heureFormatee =
-			maintenant.getHours().toString().padStart(2, '0') +
-			':' +
-			maintenant.getMinutes().toString().padStart(2, '0');
-
-		const nouveauMessage = {
-			id: Date.now(),
-			texte: texte,
-			heure: heureFormatee,
-			type: 'envoye'
-		};
-
-		const conversation = conversations.find(
-			(conv) => conv.id === activeId
-		);
+		const conversation = conversations.find((conv) => conv.id === activeId);
 
 		if (!conversation) {
 			return;
 		}
 
-		conversation.messages.push(nouveauMessage);
-		conversation.dernierMsg = 'Vous : ' + newMessage.trim();
-		conversation.heure = heureFormatee;
+		try {
+			const { data: message } = await api.post(`/api/v1/conversations/${activeId}/messages`, {
+				userId: CURRENT_USER_ID,
+				content: texte
+			});
 
-		newMessage = '';
+			conversation.messages.push({
+				id: message.id,
+				texte: message.content,
+				heure: formaterHeure(message.sentAt),
+				type: 'envoye'
+			});
+			conversation.dernierMsg = 'Vous : ' + message.content;
+			conversation.heure = formaterHeure(message.sentAt);
+		} catch (err) {
+			console.error('[messages] envoi impossible', err);
+			newMessage = texte;
+		}
 	}
 
 	function handleKeydown(event) {
@@ -203,7 +211,15 @@
 				</button>
 			{/each}
 
-			{#if filteredConversations.length === 0}
+			{#if chargement}
+				<div class="no-results">
+					Chargement des conversations…
+				</div>
+			{:else if erreur}
+				<div class="no-results">
+					Impossible de charger les conversations.
+				</div>
+			{:else if filteredConversations.length === 0}
 				<div class="no-results">
 					Aucune conversation trouvée
 				</div>

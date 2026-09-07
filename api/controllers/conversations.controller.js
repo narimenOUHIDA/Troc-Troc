@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
+import { Op, fn, col } from "sequelize";
 import { Conversation, Listing, Message, Participant, User } from "../models/index.js";
 
 // NOTE: pas encore d'authentification (feat/auth-api pas mergée) : userId est
@@ -29,7 +30,11 @@ export async function getConversations(req, res) {
         model: Conversation,
         as: "conversations",
         through: { attributes: [] },
-        include: [{ model: Listing, as: "listing" }],
+        include: [
+          { model: Listing, as: "listing" },
+          { model: User, as: "users", through: { attributes: [] }, attributes: ["id", "firstName", "lastName"] },
+          { model: Message, as: "messages", separate: true, order: [["sentAt", "DESC"]], limit: 1 },
+        ],
       },
     ],
   });
@@ -38,7 +43,25 @@ export async function getConversations(req, res) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: "Utilisateur introuvable" });
   }
 
-  return res.status(StatusCodes.OK).json({ data: user.conversations });
+  const conversationIds = user.conversations.map((conversation) => conversation.id);
+
+  // Nombre de messages non lus envoyés par l'autre participant, groupés par conversation.
+  const unreadRows = await Message.findAll({
+    attributes: ["conversationId", [fn("COUNT", col("id")), "unreadCount"]],
+    where: { conversationId: conversationIds, userId: { [Op.ne]: value.userId }, isRead: false },
+    group: ["conversationId"],
+    raw: true,
+  });
+  const unreadByConversation = Object.fromEntries(
+    unreadRows.map((row) => [row.conversationId, Number(row.unreadCount)]),
+  );
+
+  const conversations = user.conversations.map((conversation) => ({
+    ...conversation.toJSON(),
+    unreadCount: unreadByConversation[conversation.id] ?? 0,
+  }));
+
+  return res.status(StatusCodes.OK).json({ data: conversations });
 }
 
 // GET /api/v1/conversations/:id?userId=
@@ -80,6 +103,12 @@ export async function getConversationById(req, res) {
   if (!isParticipant) {
     return res.status(StatusCodes.FORBIDDEN).json({ message: "Vous ne participez pas à cette conversation" });
   }
+
+  // On consulte la conversation : les messages de l'autre participant passent en "lu".
+  await Message.update(
+    { isRead: true },
+    { where: { conversationId: conversation.id, userId: { [Op.ne]: value.userId }, isRead: false } },
+  );
 
   return res.status(StatusCodes.OK).json({ data: conversation });
 }
