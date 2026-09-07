@@ -21,6 +21,7 @@
     "express": "^5.2.1",
     "http-status-codes": "^2.3.0",
     "joi": "^18.2.5",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "sequelize": "^6.37.8",
     "xss": "^1.0.15"
