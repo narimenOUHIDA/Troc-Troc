@@ -27,9 +27,7 @@ services:
       DB_HOST: postgres
     ports:
       - "3000:3000"
-    volumes:
-      - ./api:/app
-      - /app/node_modules
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,9 +40,7 @@ services:
       - ./frontend/.env
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+  
     depends_on:
       - api
 
