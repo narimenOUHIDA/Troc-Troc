@@ -25,7 +25,7 @@ const app = express();
 app.use(express.json());
 
 //sert à autoriser ton frontend et ton backend à communiquer entre eux lorsqu’ils sont sur des origines différentes.
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 app.use(authRouter);
 app.use('/api/v1/annonces', listingsRouter);
