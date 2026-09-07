@@ -44,6 +44,16 @@
 	<div class="header-auth">
 		<ThemeToggle />
 
+		<!-- Messagerie déjà branchée sur l'API (voir routes/messages/+page.svelte) : accessible même
+		     en variante "visiteur", tant qu'il n'y a pas de vraie session pour distinguer les deux. -->
+		<a class="header-icon-link" href="/messages" aria-label="Messagerie">
+			<svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+				<rect x="2.5" y="4.5" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+				<path d="m3 5.5 7 5.5 7-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+			{#if nbMessages > 0}<span class="header-badge">{nbMessages}</span>{/if}
+		</a>
+
 		{#if connecte}
 			<a class="button-accent" href="/deposer">+ Déposer une annonce</a>
 
@@ -58,14 +68,6 @@
 					<path d="M8.2 15.5a1.8 1.8 0 0 0 3.6 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
 				</svg>
 				{#if nbNotifications > 0}<span class="header-badge">{nbNotifications}</span>{/if}
-			</a>
-
-			<a class="header-icon-link" href="/messages" aria-label="Messagerie">
-				<svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-					<rect x="2.5" y="4.5" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5" />
-					<path d="m3 5.5 7 5.5 7-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-				</svg>
-				{#if nbMessages > 0}<span class="header-badge">{nbMessages}</span>{/if}
 			</a>
 
 			<a class="header-avatar" href="/profil" aria-label="Mon profil">{initiales}</a>
