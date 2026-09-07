@@ -1,107 +1,28 @@
-// `$env/dynamic/public` (plutôt que `$env/static/public`) permet de changer
-// PUBLIC_API_URL sans rebuild (utile en Docker où l'URL de l'API varie selon l'environnement).
-import { env } from '$env/dynamic/public';
-
-// URL de base de l'API backend (Express). Fallback sur le port par défaut en dev local
-// si la variable d'environnement PUBLIC_API_URL n'est pas définie.
-const API_URL = env.PUBLIC_API_URL ?? 'http://localhost:3000';
-
-/**
- * Options acceptées par `request()` et par les helpers `api.get/post/put/patch/delete`.
- *
- * @typedef {object} RequestOptions
- * @property {string} [method] - Verbe HTTP (GET par défaut).
- * @property {unknown} [body] - Sera sérialisé en JSON s'il est présent.
- * @property {Record<string, string>} [headers] - En-têtes additionnels, fusionnés après les en-têtes par défaut.
- * @property {typeof fetch} [fetch] - Pass the `fetch` from a `load` function when calling during SSR
- *   (le `fetch` global de SvelteKit gère les cookies/credentials côté serveur, contrairement au `fetch` natif du navigateur).
- */
-
-/**
- * Erreur levée quand l'API répond avec un status HTTP en erreur (4xx/5xx).
- * Porte le status et le corps de la réponse pour permettre un traitement fin
- * côté appelant (ex: afficher `error.data.message` dans un formulaire).
- */
-export class ApiError extends Error {
-	/**
-	 * @param {string} message
-	 * @param {number} status
-	 * @param {unknown} data
-	 */
-	constructor(message, status, data) {
-		super(message);
-		this.name = 'ApiError';
-		this.status = status;
-		this.data = data;
-	}
-}
-
-/**
- * Effectue un appel HTTP vers l'API backend et retourne le corps de la réponse
- * déjà parsé (JSON si le Content-Type le permet, sinon texte brut).
- *
- * @param {string} path - Chemin relatif à API_URL, ex: '/annonces'.
- * @param {RequestOptions} [options]
- * @returns {Promise<unknown>}
- * @throws {ApiError} si la réponse HTTP n'est pas ok (status hors 200-299).
- */
-async function request(path, { method = 'GET', body, headers = {}, fetch: fetchFn = fetch } = {}) {
-	console.log(`[api] ${method} ${path}`, body ?? '');
-
-	const response = await fetchFn(`${API_URL}${path}`, {
-		method,
-		// Envoie/reçoit le cookie de session (JWT) requis par le backend pour l'authentification.
-		credentials: 'include',
-		headers: {
-			// N'ajoute Content-Type que s'il y a un body à envoyer, sinon un GET
-			// se retrouverait avec un header inutile (voire gênant pour certains serveurs).
-			...(body ? { 'Content-Type': 'application/json' } : {}),
-			...headers
-		},
-		body: body ? JSON.stringify(body) : undefined
-	});
-
-	// Le backend peut répondre en JSON (cas normal) ou en texte brut (ex: erreur 500 générique) :
-	// on adapte le parsing selon le Content-Type plutôt que de supposer du JSON partout.
-	const contentType = response.headers.get('content-type') ?? '';
-	const data = contentType.includes('application/json') ? await response.json() : await response.text();
+// export par défaut d'une fonction asynchrone qui s'appelle api
+// cette fonction attend au plus 3 arguments : un endpoint ; une méthode (valeur par défaut GET) ; un body
+export default async function api(endpoint, method = "GET", body) {
+	// fonction JS qui permet de créer des requetes HTTP et de les envoyer
+	// response contient la réponse de l'API à la requête qui sera envoyée
+	const response = await fetch(
+		// URL de la requête : VITE_API_URL provient du .env --> http://localhost:3000 ; concaténé avec le premier argument de la fonction
+		// exemple http://localhost:3000/lists
+		`${import.meta.env.VITE_API_URL}${endpoint}`,
+		{ // entêtes de la requête
+			method, // deuxième argument de la fonction : GET / POST / PATCH / PUT / DELETE
+			headers: {
+				"Content-Type": "application/json", // protocle HTTP : annonce que le body est du JSON
+				Authorization: `Bearer ${localStorage.getItem("token")}`, // ajoute le token dans l'entête de la requête
+			},
+			body: JSON.stringify(body), // body de la requête, troisème argument de la fonction api
+		});
 
 	if (!response.ok) {
-		console.log(`[api] ${method} ${path} → erreur ${response.status}`, data);
-		throw new ApiError(data?.message ?? response.statusText, response.status, data);
+		throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
 	}
 
-	console.log(`[api] ${method} ${path} → ${response.status}`);
+	// récupère le body de la réponse avec response.json()
+	const data = await response.json();
+
+	// retourne le body de la réponse (de l'API)
 	return data;
 }
-
-export const api = {
-	/**
-	 * @param {string} path
-	 * @param {Omit<RequestOptions, 'method' | 'body'>} [options]
-	 */
-	get: (path, options) => request(path, { ...options, method: 'GET' }),
-	/**
-	 * @param {string} path
-	 * @param {unknown} [body]
-	 * @param {Omit<RequestOptions, 'method' | 'body'>} [options]
-	 */
-	post: (path, body, options) => request(path, { ...options, method: 'POST', body }),
-	/**
-	 * @param {string} path
-	 * @param {unknown} [body]
-	 * @param {Omit<RequestOptions, 'method' | 'body'>} [options]
-	 */
-	put: (path, body, options) => request(path, { ...options, method: 'PUT', body }),
-	/**
-	 * @param {string} path
-	 * @param {unknown} [body]
-	 * @param {Omit<RequestOptions, 'method' | 'body'>} [options]
-	 */
-	patch: (path, body, options) => request(path, { ...options, method: 'PATCH', body }),
-	/**
-	 * @param {string} path
-	 * @param {Omit<RequestOptions, 'method' | 'body'>} [options]
-	 */
-	delete: (path, options) => request(path, { ...options, method: 'DELETE' })
-};

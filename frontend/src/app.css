@@ -23,7 +23,8 @@
 	--color-sur-vert-troc: #ffffff;
 	/* Couleurs fixes (indépendantes du thème) : usages où la charte impose une teinte précise plutôt
 	   que de suivre le thème actif. */
-	--color-sombre-fixe: #19352b; /* survol des boutons primaires, fond du pied de page */
+	--color-sombre-fixe: #19352b;
+	/* survol des boutons primaires, fond du pied de page */
 	--color-vert-troc-disabled-fond: #b6d1c5;
 	--color-vert-troc-disabled-texte: #e0e8e0;
 	--color-vendu-fond: #5f5e5a;
@@ -922,7 +923,7 @@ a.button-accent:hover {
 	flex-wrap: wrap;
 }
 
-.deposer-row > label {
+.deposer-row>label {
 	flex: 1;
 	min-width: 10rem;
 }
@@ -1063,6 +1064,7 @@ a.button-accent:hover {
 	background: var(--color-surface);
 	border: 1px solid rgba(var(--color-overlay-rgb), 0.15);
 	border-radius: 0.75rem;
+	margin-top: 70px;
 }
 
 .auth-card h1 {
