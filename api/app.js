@@ -6,6 +6,7 @@ import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import listingsRouter from './routes/listings.routes.js';
+import conversationsRouter from './routes/conversations.routes.js';
 
 // Create Express app
 const app = express();
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/v1/annonces', listingsRouter);
+app.use('/api/v1/conversations', conversationsRouter);
 
 // Gestionnaire d'erreurs centralisé : renvoie du JSON plutôt que la page HTML par défaut d'Express
 app.use((err, req, res, next) => {

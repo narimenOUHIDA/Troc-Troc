@@ -60,7 +60,18 @@ async function seed() {
     console.log("Seeding Participant...");
     const participants = await Participant.bulkCreate(data.participants, { validate: true,  returning: true });
 
-   
+    // Resynchronisation des séquences PostgreSQL : le dataset fournit des id explicites,
+    // donc les séquences "id" de chaque table restent à 1 et la prochaine création via
+    // l'API (Sequelize, id auto) entre en conflit avec un id déjà pris par le seed.
+    console.log("Resynchronisation des séquences...");
+    const tablesWithSerialId = ["category", "status", "postalCode", "user", "listing", "photo", "conversation", "message"];
+
+    for (const table of tablesWithSerialId) {
+      await sequelize.query(
+        `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1))`
+      );
+    }
+
     // 3. On fermer la connection sequelize
     console.log("✅ Seeding complete!");
   } catch (error) {
