@@ -1,21 +1,28 @@
 <script>
 	// Écran 3/9 des wireframes : Détail d'une annonce (US11, US12)
 	// — voir docs/conception/troctroc-wireframes.md §1.3
-	//
-	// Même choix que /annonces : pas de CSS dédié pour l'instant. Galerie et annonces similaires
-	// réutilisent les classes déjà stylées (annonce-card, annonce-photo...) ; le reste (fil d'Ariane,
-	// colonne infos, encart vendeur) reste en HTML brut.
 
 	import { page } from '$app/state';
 	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
-	import ThemeToggle from '$lib/ThemeToggle.svelte';
 	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
-	import logo from '$lib/assets/logo-mobile.png';
+	import Header from '$lib/Header.svelte';
+	import AnnonceCard from '$lib/AnnonceCard.svelte';
 
 	// $derived (pas juste lu une fois) : reste correct si on navigue d'une annonce à une autre sans
 	// démonter le composant (ex. clic sur une annonce similaire, SvelteKit réutilise la même page).
 	let annonce = $derived(trouverAnnonce(page.params.id));
 	let similaires = $derived(annonce ? annoncesSimilaires(annonce) : []);
+
+	// Galerie : photo principale + vignettes cliquables, à partir des vraies photos de l'annonce
+	// (au lieu du visuel générique répété 4 fois). Repart sur la première photo à chaque nouvelle
+	// annonce (le composant étant réutilisé d'une annonce à l'autre, voir le commentaire ci-dessus).
+	let photos = $derived(annonce?.photos?.length ? annonce.photos : [photoPlaceholder]);
+	let indexPhotoActive = $state(0);
+
+	$effect(() => {
+		annonce?.id;
+		indexPhotoActive = 0;
+	});
 
 	const formateurDate = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -41,31 +48,14 @@
 	<title>{annonce ? `TrocTroc — ${annonce.titre}` : 'TrocTroc — Annonce introuvable'}</title>
 </svelte:head>
 
-<header class="site-header">
-	<a class="logo" href="/"><img src={logo} alt="TrocTroc" /></a>
-
-	<form class="header-search" role="search" onsubmit={(event) => event.preventDefault()}>
-		<input type="search" name="q" placeholder="Rechercher un article..." aria-label="Rechercher un article" />
-	</form>
-
-	<nav class="header-nav" aria-label="Navigation principale">
-		<a href="/categories">Catégories</a>
-		<a href="/deposer">Déposer une annonce</a>
-	</nav>
-
-	<div class="header-auth">
-		<ThemeToggle />
-		<a href="/connexion">Connexion</a>
-		<a class="button-primary" href="/inscription">S'inscrire</a>
-	</div>
-</header>
+<Header connecte={false} />
 
 <main>
 	{#if !annonce}
 		<p>Cette annonce n'existe pas ou a été supprimée.</p>
 		<a href="/annonces">&larr; Retour à la liste des annonces</a>
 	{:else}
-		<nav aria-label="Fil d'Ariane">
+		<nav class="breadcrumb" aria-label="Fil d'Ariane">
 			<a href="/">Accueil</a>
 			/ <a href="/annonces?categorie={encodeURIComponent(annonce.categorie)}">{annonce.categorie}</a>
 			/ {annonce.titre}
@@ -74,33 +64,46 @@
 		<div class="annonce-detail">
 			<!-- Colonne gauche : galerie (photo principale + vignettes) et description. -->
 			<section aria-label="Photos de l'annonce">
-				<div class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></div>
+				<div class="annonce-photo" aria-hidden="true"><img src={photos[indexPhotoActive]} alt="" /></div>
 
-				<ul class="annonce-vignettes">
-					{#each Array(4) as _, i (i)}
-						<li class="annonce-photo" aria-hidden="true"><img src={photoPlaceholder} alt="" /></li>
-					{/each}
-				</ul>
+				{#if photos.length > 1}
+					<ul class="annonce-vignettes">
+						{#each photos as photo, i (i)}
+							<li>
+								<button
+									type="button"
+									class="annonce-photo annonce-vignette-bouton"
+									class:active={i === indexPhotoActive}
+									onclick={() => (indexPhotoActive = i)}
+									aria-label="Voir la photo {i + 1} sur {photos.length}"
+									aria-current={i === indexPhotoActive}
+								>
+									<img src={photo} alt="" />
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 
 				<h2>Description</h2>
 				<p>{annonce.description}</p>
 			</section>
 
 			<!-- Colonne droite : infos annonce, encart vendeur, action de contact. -->
-			<aside aria-label="Informations sur l'annonce">
-				<p>{annonce.categorie}</p>
+			<aside class="annonce-infos" aria-label="Informations sur l'annonce">
+				<p class="annonce-infos-categorie">{annonce.categorie}</p>
 				<h1>{annonce.titre}</h1>
-				<p>{annonce.prix} €</p>
-				<p>{annonce.ville} {annonce.codePostal} · à {annonce.distanceKm} km</p>
-				<p>Publiée le {formaterDate(annonce.datePublication)}</p>
+				<p class="annonce-infos-prix">{annonce.prix} €</p>
+				<p class="annonce-infos-meta">{annonce.ville} {annonce.codePostal} · à {annonce.distanceKm} km</p>
+				<p class="annonce-infos-meta">Publiée le {formaterDate(annonce.datePublication)}</p>
 
 				{#if annonce.statut === 'vendu'}
-					<p><strong>Vendu</strong></p>
+					<p class="annonce-infos-vendu"><strong>Vendu</strong></p>
 				{/if}
 
-				<div>
-					<p>{annonce.vendeur.nom}</p>
-					<p>Membre depuis {annonce.vendeur.membreDepuis} · {annonce.vendeur.nbAnnonces} annonces</p>
+				<div class="annonce-vendeur">
+					<p class="annonce-vendeur-nom">{annonce.vendeur.nom}</p>
+					<p class="annonce-vendeur-meta">Membre depuis {annonce.vendeur.membreDepuis} · {annonce.vendeur.nbAnnonces} annonces</p>
 				</div>
 
 				<button
@@ -119,20 +122,7 @@
 				<h2>Annonces similaires</h2>
 				<ul class="annonces-grid">
 					{#each similaires as annonceSimilaire (annonceSimilaire.id)}
-						<li class="annonce-card">
-							<a href="/annonces/{annonceSimilaire.id}">
-								<div class="annonce-photo" aria-hidden="true">
-									<img src={photoPlaceholder} alt="" />
-									<span class="annonce-badge-categorie">{annonceSimilaire.categorie}</span>
-									{#if annonceSimilaire.statut === 'vendu'}
-										<span class="annonce-badge-vendu">VENDU</span>
-									{/if}
-								</div>
-								<p class="annonce-titre">{annonceSimilaire.titre}</p>
-								<p class="annonce-prix">{annonceSimilaire.prix} €</p>
-								<p class="annonce-distance">{annonceSimilaire.distanceKm} km</p>
-							</a>
-						</li>
+						<AnnonceCard annonce={annonceSimilaire} />
 					{/each}
 				</ul>
 			</section>
