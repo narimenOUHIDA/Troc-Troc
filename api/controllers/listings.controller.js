@@ -10,6 +10,7 @@ import {
   PostalCode,
 } from "../models/index.js";
 import { haversineDistanceKm } from "../utils/geo.js";
+import HttpError from "../utils/HttpError.js";
 
 // Rayon de recherche autour du code postal, en kilomètres (cf. cahier des charges)
 const SEARCH_RADIUS_KM = 50;
@@ -84,4 +85,97 @@ export async function getListings(req, res) {
   });
 
   return res.status(StatusCodes.OK).json({ data: listings });
+}
+
+export async function getListingById(req, res) {
+  try {
+    const listing = await Listing.findOne({
+      where: {
+        id: req.params.id,
+        deletionDate: null,
+      },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "firstName", "lastName"],
+          include: [
+            {
+              model: PostalCode,
+              as: "PostalCode",
+            },
+          ],
+        },
+        {
+          model: Category,
+          as: "category",
+        },
+        {
+          model: Status,
+          as: "status",
+        },
+        {
+          model: Photo,
+          as: "photos",
+        },
+      ],
+    });
+
+    if (!listing) {
+      throw new HttpError("Listing not found", 404);
+    }
+
+    return res.status(StatusCodes.OK).json({
+      data: listing,
+    });
+  } catch (error) {
+    console.log("Error while fetching listing:", error);
+
+    throw new HttpError("Internal server error", 500);
+  }
+}
+
+export async function createListing(req, res, next) {
+  try {
+    // 1. Récupérer les données autorisées du frontend
+    const { title, description, price, categoryId } = req.body;
+    // 2. Récupérer l'utilisateur connecté
+    const userId = req.user.id
+
+    // 3. Vérifier que la catégorie existe
+    const category = await Category.findByPk(categoryId);
+    if (!category) {
+      throw new HttpError("Catégorie introuvable", 404);
+    }
+
+
+    // 4. Récupérer le status "Disponible"
+    const status = await Status.findByPk(1);
+    if (!status) {
+      throw new HttpError("Statut disponible introuvable", 500)
+    }
+
+    // Création de l'annonce
+    const newListing = await Listing.create({
+      title,
+      description,
+      price,
+      categoryId,
+      statusId: status.id,
+      userId
+    });
+
+    res.status(201).json(newListing);
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateListing() {
+
+}
+
+export async function deleteListing() {
+
 }

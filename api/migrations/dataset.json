@@ -11,9 +11,20 @@
     {
       "id": 3,
       "name": "Vêtements"
+    },
+    {
+      "id": 4,
+      "name": "Électroménager"
+    },
+    {
+      "id": 5,
+      "name": "Livres"
+    },
+    {
+      "id": 6,
+      "name": "Jouets"
     }
   ],
-
   "statuses": [
     {
       "id": 1,
@@ -24,7 +35,6 @@
       "name": "Vendu"
     }
   ],
-
   "postalCodes": [
     {
       "id": 1,
@@ -41,7 +51,6 @@
       "longitude": 4.8797
     }
   ],
-
   "users": [
     {
       "id": 1,
@@ -62,7 +71,6 @@
       "postalCodeId": 2
     }
   ],
-
   "listings": [
     {
       "id": 1,
@@ -87,7 +95,6 @@
       "userId": 2
     }
   ],
-
   "photos": [
     {
       "id": 1,
@@ -102,7 +109,6 @@
       "listingId": 2
     }
   ],
-
   "conversations": [
     {
       "id": 1,
@@ -110,7 +116,6 @@
       "listingId": 1
     }
   ],
-
   "messages": [
     {
       "id": 1,
@@ -121,7 +126,6 @@
       "userId": 2
     }
   ],
-
   "participants": [
     {
       "userId": 1,

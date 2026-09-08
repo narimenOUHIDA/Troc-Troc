@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
     "email": "narimen@oclock.com",
-    "password": "azertyuiop",
+    "password": "12345678",
     "lastName": "ouhida",
     "firstName": "Narimen",
     "postalCodeId": 1
@@ -16,10 +16,14 @@ Content-Type: application/json
 
 {
     "email": "narimen@oclock.com",
-    "password": "azertyuiop"
+    "password": "12345678"
 }
 
 ### GET Me
 GET http://localhost:3000/auth/me HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJpYXQiOjE3ODg1Mzg2NDEsImV4cCI6MTc4ODU0NTg0MX0.MYzhgMNEQI52JqbudEr42AMCetG3nntz0sFVH8tDKRM
+
+
+### GET Categories
+GET http://localhost:3000/categories HTTP/1.1

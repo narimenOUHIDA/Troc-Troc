@@ -4,39 +4,38 @@ import sequelize from "./sequelize-client.js";
 const Listing = sequelize.define(
     "Listing",
     {
-        title : {
+        title: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-        description : {
+        description: {
             type: DataTypes.TEXT,
         },
-        price : {
+        price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false,
         },
-        publicationDate : {
+        publicationDate: {
             type: DataTypes.DATE,
             allowNull: false,
         },
-        deletionDate : {
+        deletionDate: {
             type: DataTypes.DATE,
         },
-        categoryId : {
+        categoryId: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        statusId : {
+        statusId: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        userId : {
+        userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
     },
     { tableName: "listing", },
-
 );
 
 export default Listing;
