@@ -1,13 +1,11 @@
 <script>
   // Écran 1/9 des wireframes : Accueil (US01) — voir docs/conception/troctroc-wireframes.md §1.1
 
-  import { trouverAnnonce } from '$lib/annonces.js';
   import Header from '$lib/Header.svelte';
-  import AnnonceCard from '$lib/AnnonceCard.svelte';
   import Categories from '$lib/Categories.svelte';
 
   const idsDernieresAnnonces = [1, 4, 7, 5, 10, 6, 13, 16];
-  const dernieresAnnonces = idsDernieresAnnonces.map((id) => trouverAnnonce(id));
+  //const dernieresAnnonces = idsDernieresAnnonces.map((id) => trouverAnnonce(id));
 
   // Les deux formulaires de recherche (header + hero) soumettent en GET vers /annonces,
   // qui lit déjà q/codePostal depuis l'URL (voir routes/annonces/+page.svelte) : pas besoin
@@ -18,8 +16,11 @@
   <title>TrocTroc — Achetez, vendez et échangez près de chez vous</title>
 </svelte:head>
 
+<header>
+  <Header />
+</header>
+
 <!-- Pas encore de session utilisateur (voir Header.svelte) : variante "visiteur". -->
-<Header connecte={false} />
 
 <main>
   <!-- Bloc d'accroche : recherche "complète" (mots-clés + code postal) qui alimentera GET /annonces
@@ -57,11 +58,13 @@
   <!-- Grille des dernières annonces publiées (US01) : chaque carte mène au détail (écran 1.3). -->
   <section class="annonces">
     <h2>Dernières annonces</h2>
+    <!--
     <ul class="annonces-grid">
       {#each dernieresAnnonces as annonce (annonce.id)}
         <AnnonceCard {annonce} />
       {/each}
     </ul>
+    -->
   </section>
 </main>
 

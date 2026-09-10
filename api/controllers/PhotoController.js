@@ -1,4 +1,3 @@
-import { url } from "zod";
 import { Photo } from "../models/index.js";
 import HttpError from "../utils/HttpError.js";
 
@@ -12,7 +11,7 @@ class PhotoController {
                 throw new HttpError("Aucune photo envoyée", 400);
             }
 
-            const { listingId, order } = res.body;
+            const { listingId, order } = req.body;
 
             if (!listingId) {
                 throw new HttpError("listingId manquant", 400);
@@ -23,7 +22,7 @@ class PhotoController {
                 order: Number(order) || 1,
                 listingId: Number(listingId),
             })
-
+            console.log("photo", photo)
             res.status(201).json({ photo });
 
         } catch (error) {

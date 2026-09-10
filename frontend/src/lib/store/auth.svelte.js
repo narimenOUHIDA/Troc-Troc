@@ -1,5 +1,6 @@
 export const authStore = $state({ user: null, token: null });
 
+// @ts-ignore
 export function setAuth(user, token) {
     authStore.user = user;
     authStore.token = token;
@@ -18,19 +19,23 @@ export const clearAuth = () => {
 };
 
 export const getAuth = () => {
-    // 1. search user and token from localStorage
-    // 2. if they exist, save them into authStore
-    // 3. else clear authStore
+
     const token = localStorage.getItem("token");
+    // @ts-ignore
     const user = JSON.parse(localStorage.getItem("user"));
     if (token && user) {
         authStore.user = user;
+        // @ts-ignore
         authStore.token = token;
     } else {
         authStore.user = null;
         authStore.token = null;
     }
 };
+
+export const logout = () => {
+
+}
 
 export const isAuthenticated = () => {
     // return true if authStore.token AND authStore.user are not null

@@ -2,10 +2,10 @@
 
 <script>
   import { onMount } from 'svelte';
-  import ThemeToggle from '$lib/ThemeToggle.svelte';
-  import Logo from '$lib/Logo.svelte';
+  import Header from '$lib/Header.svelte';
 
   import api from '$lib/api.js';
+  import { urlPhoto } from '$lib/apiPhoto';
   import { authStore } from '$lib/store/auth.svelte.js';
   //import { goto } from '$app/navigation';
 
@@ -45,11 +45,8 @@
   <title>TrocTroc — Mon espace personnel</title>
 </svelte:head>
 
-<header class="site-header">
-  <a class="logo" href="/">
-    <Logo />
-  </a>
-  <ThemeToggle />
+<header>
+  <Header />
 </header>
 
 <main class="espace-main">

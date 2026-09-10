@@ -7,7 +7,7 @@
   let { children } = $props();
 
   onMount(() => {
-    getAuth(); // une seule fois, pour toute la session de navigation
+    getAuth();
   });
 </script>
 

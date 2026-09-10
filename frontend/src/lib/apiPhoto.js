@@ -1,3 +1,6 @@
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default async function apiPhoto(listingId, file, order) {
     const formData = new FormData();
 
@@ -6,7 +9,7 @@ export default async function apiPhoto(listingId, file, order) {
     formData.append('order', order);
 
     const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/photos`,
+        `${API_URL}/photos`,
         {
             method: 'POST',
             headers: {
@@ -22,3 +25,18 @@ export default async function apiPhoto(listingId, file, order) {
 
     return await response.json();
 }
+
+export function urlPhoto(path) {
+    if (!path) return '';
+
+    // Si l'API renvoie déjà une URL complète
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+
+    // Supprime "uploads/" au début si nécessaire
+    const cleanPath = path.replace(/^\/+/, '');
+
+    return `${API_URL}/${cleanPath}`;
+}
+

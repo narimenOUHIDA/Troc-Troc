@@ -8,19 +8,18 @@ export default async function api(endpoint, method = "GET", body) {
 		"Content-Type": "application/json",
 	};
 
-	//on ajoute Authorization seulement si token existe
-	if (token) {
-		headers.Authorization = `Bearer ${token}`;
-	}
 
 	const response = await fetch(
 		// URL de la requête : VITE_API_URL provient du .env --> http://localhost:3000 ; concaténé avec le premier argument de la fonction
-		// exemple http://localhost:3000/annonces
+		// exemple http://localhost:3000/lists
 		`${import.meta.env.VITE_API_URL}${endpoint}`,
-		{
+		{ // entêtes de la requête
 			method, // deuxième argument de la fonction : GET / POST / PATCH / PUT / DELETE
-			headers,
-			body: body ? JSON.stringify(body) : undefined,
+			headers: {
+				"Content-Type": "application/json", // protocle HTTP : annonce que le body est du JSON
+				Authorization: `Bearer ${localStorage.getItem("token")}`, // ajoute le token dans l'entête de la requête
+			},
+			body: JSON.stringify(body), // body de la requête, troisème argument de la fonction api
 		});
 
 	if (!response.ok) {
