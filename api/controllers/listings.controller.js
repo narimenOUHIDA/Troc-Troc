@@ -87,51 +87,88 @@ export async function getListings(req, res) {
   return res.status(StatusCodes.OK).json({ data: listings });
 }
 
+export async function findAllListings(req, res) {
+  try {
+    const listings = await Listing.findAll({
+      where,
+      include: [
+        { model: Category, as: "category" },
+        { model: Status, as: "status" },
+        { model: Photo, as: "photos" },
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "firstName", "lastName"],
+          where: Object.keys(userWhere).length ? userWhere : undefined,
+          include: [{ model: PostalCode, as: "PostalCode" }],
+        },
+      ],
+      order: [["publicationDate", "DESC"]],
+    });
+
+    if (!listings) {
+      throw new HttpError("Listings not found", 404);
+    }
+
+    return res.status(200).json({
+      data: listings,
+    });
+  }
+  catch (error) {
+    console.error(error);
+    throw new HttpError("failed to fetch list oflistings", 500)
+  }
+}
+
 export async function getListingById(req, res) {
   try {
     const listing = await Listing.findOne({
       where: {
         id: req.params.id,
-        deletionDate: null,
+        deletionDate: null
       },
+
       include: [
         {
           model: User,
-          as: "user",
-          attributes: ["id", "firstName", "lastName"],
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName'],
           include: [
             {
               model: PostalCode,
-              as: "PostalCode",
-            },
-          ],
+              as: 'PostalCode'
+            }
+          ]
         },
+
         {
           model: Category,
-          as: "category",
+          as: 'category'
         },
+
         {
           model: Status,
-          as: "status",
+          as: 'status'
         },
+
         {
           model: Photo,
-          as: "photos",
-        },
-      ],
+          as: 'photos'
+        }
+      ]
     });
 
     if (!listing) {
-      throw new HttpError("Listing not found", 404);
+      throw new HttpError('Listing not found', 404);
     }
 
-    return res.status(StatusCodes.OK).json({
-      data: listing,
+    return res.status(200).json({
+      data: listing
     });
-  } catch (error) {
-    console.log("Error while fetching listing:", error);
 
-    throw new HttpError("Internal server error", 500);
+  } catch (error) {
+    console.log('Error while fetching listing:', error);
+    throw new HttpError('Internal server error', 500);
   }
 }
 
@@ -211,10 +248,92 @@ export async function getMyListings(req, res, next) {
 
 }
 
-export async function updateListing() {
+export async function updateListing(req, res, next) {
+  try {
+    const listing = await Listing.findOne({
+      where: {
+        id: req.params.id,
+        deletionDate: null,
+      },
+    });
 
+    if (!listing) {
+      return res.status(404).json({
+        message: 'Annonce introuvable',
+      });
+    }
+
+    // Vérification propriétaire
+    if (Number(listing.userId) !== Number(req.user.id)) {
+      return res.status(403).json({
+        message: 'Vous ne pouvez pas modifier cette annonce',
+      });
+    }
+
+    const {
+      title,
+      description,
+      price,
+      categoryId,
+    } = req.body;
+
+    // Vérification catégorie
+    if (categoryId !== undefined) {
+      const category = await Category.findByPk(categoryId);
+
+      if (!category) {
+        return res.status(400).json({
+          message: 'Catégorie introuvable',
+        });
+      }
+    }
+
+    await listing.update({
+      title,
+      description,
+      price,
+      categoryId,
+    });
+
+    return res.status(200).json({
+      message: 'Annonce modifiée avec succès',
+      data: listing,
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
-export async function deleteListing() {
+export async function deleteListing(req, res, next) {
+  try {
+    const listing = await Listing.findOne({
+      where: {
+        id: req.params.id,
+        deletionDate: null,
+      },
+    });
 
+    if (!listing) {
+      return res.status(404).json({
+        message: 'Annonce introuvable',
+      });
+    }
+
+    // Vérification propriétaire
+    if (Number(listing.userId) !== Number(req.user.id)) {
+      return res.status(403).json({
+        message: 'Vous ne pouvez pas supprimer cette annonce',
+      });
+    }
+
+    await listing.update({
+      deletionDate: new Date(),
+    });
+
+    return res.status(200).json({
+      message: 'Annonce supprimée avec succès',
+    });
+  } catch (error) {
+    next(error);
+  }
 }

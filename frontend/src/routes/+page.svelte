@@ -3,13 +3,6 @@
 
   import Header from '$lib/Header.svelte';
   import Categories from '$lib/Categories.svelte';
-
-  const idsDernieresAnnonces = [1, 4, 7, 5, 10, 6, 13, 16];
-  //const dernieresAnnonces = idsDernieresAnnonces.map((id) => trouverAnnonce(id));
-
-  // Les deux formulaires de recherche (header + hero) soumettent en GET vers /annonces,
-  // qui lit déjà q/codePostal depuis l'URL (voir routes/annonces/+page.svelte) : pas besoin
-  // de gérer la navigation en JS, le comportement natif du <form> suffit.
 </script>
 
 <svelte:head>
@@ -19,8 +12,6 @@
 <header>
   <Header />
 </header>
-
-<!-- Pas encore de session utilisateur (voir Header.svelte) : variante "visiteur". -->
 
 <main>
   <!-- Bloc d'accroche : recherche "complète" (mots-clés + code postal) qui alimentera GET /annonces
@@ -49,7 +40,7 @@
 
   <!-- Grille des 8 catégories (US09) : chaque tuile pré-filtre la liste des annonces. -->
   <section class="categories">
-    <h2>Catégories</h2>
+    <h2>Explorer par catégorie</h2>
     <ul class="categories-grid">
       <Categories />
     </ul>

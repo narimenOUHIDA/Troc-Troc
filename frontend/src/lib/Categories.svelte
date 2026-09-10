@@ -43,8 +43,6 @@
 </script>
 
 <section class="categories-section">
-  <h2>Explorer par catégorie</h2>
-
   {#if chargement}
     <p class="categories-message">Chargement des catégories...</p>
   {:else if erreur}

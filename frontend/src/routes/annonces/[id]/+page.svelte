@@ -1,140 +1,385 @@
 <script>
-	// Écran 3/9 des wireframes : Détail d'une annonce (US11, US12)
-	// — voir docs/conception/troctroc-wireframes.md §1.3
+  import { page } from '$app/state';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import api from '$lib/api.js';
+  import Header from '$lib/Header.svelte';
+  import { authStore } from '$lib/store/auth.svelte.js';
 
-	import { page } from '$app/state';
-	import { trouverAnnonce, annoncesSimilaires } from '$lib/annonces.js';
-	import photoPlaceholder from '$lib/assets/annonce-placeholder.png';
-	import Header from '$lib/Header.svelte';
-	import AnnonceCard from '$lib/AnnonceCard.svelte';
+  let annonce = $state(null);
+  let chargement = $state(true);
+  let erreur = $state('');
 
-	// $derived (pas juste lu une fois) : reste correct si on navigue d'une annonce à une autre sans
-	// démonter le composant (ex. clic sur une annonce similaire, SvelteKit réutilise la même page).
-	let annonce = $derived(trouverAnnonce(page.params.id));
-	let similaires = $derived(annonce ? annoncesSimilaires(annonce) : []);
+  let modeEdition = $state(false);
 
-	// Galerie : photo principale + vignettes cliquables, à partir des vraies photos de l'annonce
-	// (au lieu du visuel générique répété 4 fois). Repart sur la première photo à chaque nouvelle
-	// annonce (le composant étant réutilisé d'une annonce à l'autre, voir le commentaire ci-dessus).
-	let photos = $derived(annonce?.photos?.length ? annonce.photos : [photoPlaceholder]);
-	let indexPhotoActive = $state(0);
+  let title = $state('');
+  let description = $state('');
+  let price = $state('');
+  let categoryId = $state('');
 
-	$effect(() => {
-		annonce?.id;
-		indexPhotoActive = 0;
-	});
+  let suppressionEnCours = $state(false);
+  let modificationEnCours = $state(false);
 
-	const formateurDate = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const annonceId = page.params.id;
 
-	/**
-	 * @param {string} dateIso
-	 */
-	function formaterDate(dateIso) {
-		return formateurDate.format(new Date(dateIso));
-	}
+  onMount(async () => {
+    try {
+      const response = await api(`/api/v1/annonces/${annonceId}`);
 
-	/**
-	 * Pas encore de POST /conversations côté backend (messagerie US13-17 à venir) : on trace
-	 * seulement l'intention pour l'instant.
-	 * @param {MouseEvent} event
-	 */
-	function onContacter(event) {
-		event.preventDefault();
-		console.log('[détail annonce] contacter le vendeur', annonce?.vendeur.nom);
-	}
+      annonce = response.data;
+
+      // Pré-remplissage du formulaire
+      title = annonce.title;
+      description = annonce.description;
+      price = annonce.price;
+      categoryId = annonce.categoryId;
+    } catch (e) {
+      erreur = e.message;
+    } finally {
+      chargement = false;
+    }
+  });
+
+  // Vérifie si l'utilisateur connecté est le propriétaire
+  let estProprietaire = $derived(
+    annonce && authStore.user && Number(annonce.user?.id) === Number(authStore.user.id),
+  );
+
+  function commencerModification() {
+    modeEdition = true;
+    erreur = '';
+  }
+
+  function annulerModification() {
+    modeEdition = false;
+
+    // Remet les anciennes valeurs
+    title = annonce.title;
+    description = annonce.description;
+    price = annonce.price;
+    categoryId = annonce.categoryId;
+
+    erreur = '';
+  }
+
+  async function modifierAnnonce(event) {
+    event.preventDefault();
+
+    modificationEnCours = true;
+    erreur = '';
+
+    try {
+      const response = await api(`/api/v1/annonces/${annonceId}`, 'PATCH', {
+        title,
+        description,
+        price: Number(price),
+        categoryId: Number(categoryId),
+      });
+
+      annonce = {
+        ...annonce,
+        ...response.data,
+      };
+
+      modeEdition = false;
+    } catch (e) {
+      erreur = e.message;
+    } finally {
+      modificationEnCours = false;
+    }
+  }
+
+  async function supprimerAnnonce() {
+    const confirmation = confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?');
+
+    if (!confirmation) return;
+
+    suppressionEnCours = true;
+    erreur = '';
+
+    try {
+      await api(`/api/v1/annonces/${annonceId}`, 'DELETE');
+
+      // Retour à la liste après suppression
+      goto('/annonces');
+    } catch (e) {
+      erreur = e.message;
+      suppressionEnCours = false;
+    }
+  }
+
+  function urlPhoto(url) {
+    return `${import.meta.env.VITE_API_URL}/${url}`;
+  }
 </script>
 
 <svelte:head>
-	<title>{annonce ? `TrocTroc — ${annonce.titre}` : 'TrocTroc — Annonce introuvable'}</title>
+  <title>
+    {annonce ? `TrocTroc — ${annonce.title}` : 'TrocTroc — Annonce'}
+  </title>
 </svelte:head>
 
-<Header connecte={false} />
+<Header />
 
 <main>
-	{#if !annonce}
-		<p>Cette annonce n'existe pas ou a été supprimée.</p>
-		<a href="/annonces">&larr; Retour à la liste des annonces</a>
-	{:else}
-		<nav class="breadcrumb" aria-label="Fil d'Ariane">
-			<a href="/">Accueil</a>
-			/ <a href="/annonces?categorie={encodeURIComponent(annonce.categorie)}">{annonce.categorie}</a>
-			/ {annonce.titre}
-		</nav>
+  {#if chargement}
+    <p>Chargement de l'annonce...</p>
+  {:else if erreur && !annonce}
+    <p class="form-error">{erreur}</p>
+  {:else if annonce}
+    {#if erreur}
+      <p class="form-error">{erreur}</p>
+    {/if}
 
-		<div class="annonce-detail">
-			<!-- Colonne gauche : galerie (photo principale + vignettes) et description. -->
-			<section aria-label="Photos de l'annonce">
-				<div class="annonce-photo" aria-hidden="true"><img src={photos[indexPhotoActive]} alt="" /></div>
+    {#if modeEdition}
+      <!-- ========================= -->
+      <!-- FORMULAIRE DE MODIFICATION -->
+      <!-- ========================= -->
 
-				{#if photos.length > 1}
-					<ul class="annonce-vignettes">
-						{#each photos as photo, i (i)}
-							<li>
-								<button
-									type="button"
-									class="annonce-photo annonce-vignette-bouton"
-									class:active={i === indexPhotoActive}
-									onclick={() => (indexPhotoActive = i)}
-									aria-label="Voir la photo {i + 1} sur {photos.length}"
-									aria-current={i === indexPhotoActive}
-								>
-									<img src={photo} alt="" />
-								</button>
-							</li>
-						{/each}
-					</ul>
-				{/if}
+      <section class="detail-annonce">
+        <h1>Modifier l'annonce</h1>
 
-				<h2>Description</h2>
-				<p>{annonce.description}</p>
-			</section>
+        <form onsubmit={modifierAnnonce}>
+          <label>
+            Titre
+            <input type="text" bind:value={title} required maxlength="255" />
+          </label>
 
-			<!-- Colonne droite : infos annonce, encart vendeur, action de contact. -->
-			<aside class="annonce-infos" aria-label="Informations sur l'annonce">
-				<p class="annonce-infos-categorie">{annonce.categorie}</p>
-				<h1>{annonce.titre}</h1>
-				<p class="annonce-infos-prix">{annonce.prix} €</p>
-				<p class="annonce-infos-meta">{annonce.ville} {annonce.codePostal} · à {annonce.distanceKm} km</p>
-				<p class="annonce-infos-meta">Publiée le {formaterDate(annonce.datePublication)}</p>
+          <label>
+            Description
+            <textarea bind:value={description} required rows="6"></textarea>
+          </label>
 
-				{#if annonce.statut === 'vendu'}
-					<p class="annonce-infos-vendu"><strong>Vendu</strong></p>
-				{/if}
+          <label>
+            Prix
+            <input type="number" bind:value={price} min="0" step="0.01" required />
+          </label>
 
-				<div class="annonce-vendeur">
-					<p class="annonce-vendeur-nom">{annonce.vendeur.nom}</p>
-					<p class="annonce-vendeur-meta">Membre depuis {annonce.vendeur.membreDepuis} · {annonce.vendeur.nbAnnonces} annonces</p>
-				</div>
+          <label>
+            Catégorie
+            <input type="number" bind:value={categoryId} min="1" required />
+          </label>
 
-				<button
-					type="button"
-					class="button-primary"
-					onclick={onContacter}
-					disabled={annonce.statut === 'vendu'}
-				>
-					{annonce.statut === 'vendu' ? 'Annonce vendue' : 'Contacter le vendeur'}
-				</button>
-			</aside>
-		</div>
+          <div class="actions">
+            <button type="submit" disabled={modificationEnCours}>
+              {modificationEnCours ? 'Modification...' : 'Enregistrer les modifications'}
+            </button>
 
-		{#if similaires.length > 0}
-			<section class="annonces" aria-label="Annonces similaires">
-				<h2>Annonces similaires</h2>
-				<ul class="annonces-grid">
-					{#each similaires as annonceSimilaire (annonceSimilaire.id)}
-						<AnnonceCard annonce={annonceSimilaire} />
-					{/each}
-				</ul>
-			</section>
-		{/if}
-	{/if}
+            <button type="button" class="button-secondary" onclick={annulerModification}>
+              Annuler
+            </button>
+          </div>
+        </form>
+      </section>
+    {:else}
+      <!-- ================= -->
+      <!-- DETAIL DE L'ANNONCE -->
+      <!-- ================= -->
+
+      <section class="detail-annonce">
+        <div class="detail-image">
+          {#if annonce.photos?.length}
+            <img src={urlPhoto(annonce.photos[0].url)} alt={annonce.title} />
+          {:else}
+            <span>Aucune photo</span>
+          {/if}
+        </div>
+
+        <div class="detail-contenu">
+          {#if annonce.category}
+            <span class="categorie">
+              {annonce.category.name}
+            </span>
+          {/if}
+
+          <h1>{annonce.title}</h1>
+
+          <p class="prix">
+            {annonce.price} €
+          </p>
+
+          {#if annonce.status}
+            <p>
+              Statut :
+              <strong>{annonce.status.name}</strong>
+            </p>
+          {/if}
+
+          <div class="description">
+            <h2>Description</h2>
+            <p>{annonce.description}</p>
+          </div>
+
+          {#if annonce.user}
+            <div class="vendeur">
+              <h2>Vendeur</h2>
+              <p>
+                {annonce.user.firstName}
+                {annonce.user.lastName}
+              </p>
+
+              {#if annonce.user.PostalCode}
+                <p>
+                  {annonce.user.PostalCode.postalCode}
+                  {annonce.user.PostalCode.city}
+                </p>
+              {/if}
+            </div>
+          {/if}
+
+          <!-- ACTIONS PROPRIETAIRE -->
+
+          {#if estProprietaire}
+            <div class="actions-proprietaire">
+              <button type="button" onclick={commencerModification}> Modifier l'annonce </button>
+
+              <button
+                type="button"
+                class="button-delete"
+                onclick={supprimerAnnonce}
+                disabled={suppressionEnCours}
+              >
+                {suppressionEnCours ? 'Suppression...' : 'Supprimer lannonce'}
+              </button>
+            </div>
+          {:else}
+            <button type="button"> Contacter le vendeur </button>
+          {/if}
+        </div>
+      </section>
+    {/if}
+  {/if}
 </main>
 
-<footer class="site-footer">
-	<p>© TrocTroc</p>
-	<nav aria-label="Liens du pied de page">
-		<a href="/a-propos">À propos</a>
-		<a href="/cgu">CGU</a>
-		<a href="/contact">Contact</a>
-	</nav>
-</footer>
+<style>
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .detail-annonce {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .detail-image {
+    aspect-ratio: 1 / 0.75;
+    background: #e4e1d6;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8c897e;
+  }
+
+  .detail-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .detail-contenu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .categorie {
+    color: #2f7d5b;
+    font-weight: 600;
+  }
+
+  h1 {
+    margin: 0;
+    color: #19352b;
+    font-size: 2rem;
+  }
+
+  h2 {
+    color: #19352b;
+  }
+
+  .prix {
+    color: #2f7d5b;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .description,
+  .vendeur {
+    border-top: 1px solid #e4e1d6;
+    padding-top: 1rem;
+  }
+
+  .actions,
+  .actions-proprietaire {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  button {
+    border: 0;
+    border-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    background: #2f7d5b;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .button-secondary {
+    background: #e4e1d6;
+    color: #19352b;
+  }
+
+  .button-delete {
+    background: #b42318;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 700px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-weight: 600;
+  }
+
+  input,
+  textarea {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font: inherit;
+  }
+
+  .form-error {
+    color: #b42318;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 700px) {
+    .detail-annonce {
+      grid-template-columns: 1fr;
+    }
+
+    .actions,
+    .actions-proprietaire {
+      flex-direction: column;
+    }
+  }
+</style>
