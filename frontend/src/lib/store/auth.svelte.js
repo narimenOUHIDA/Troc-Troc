@@ -1,6 +1,6 @@
 export const authStore = $state({ user: null, token: null });
 
-export const setAuth = (user, token) => {
+export function setAuth(user, token) {
     authStore.user = user;
     authStore.token = token;
 

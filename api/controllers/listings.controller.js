@@ -155,8 +155,7 @@ export async function createListing(req, res, next) {
       throw new HttpError("Statut disponible introuvable", 500)
     }
 
-    // Création de l'annonce
-    const newListing = await Listing.create({
+    console.log("Données avant création :", {
       title,
       description,
       price,
@@ -165,11 +164,51 @@ export async function createListing(req, res, next) {
       userId
     });
 
+    // Création de l'annonce
+    const newListing = await Listing.create({
+      title,
+      description,
+      price,
+      categoryId,
+      statusId: status.id,
+      userId,
+      publicationDate: new Date(),
+    });
+
+    console.log("ANNONCE CRÉÉE :", newListing);
+
+
     res.status(201).json(newListing);
 
   } catch (error) {
-    next(error);
+    console.error("ERREUR Listing.create :", error);
+    throw new HttpError("Failed to create listing", 400);
   }
+}
+
+// Affichage de mes annonces
+export async function getMyListings(req, res, next) {
+  try {
+    const myListings = await Listing.findAll({
+      where: {
+        userId: req.user.id,
+        deletionDate: null,
+      },
+      include: [
+        { model: Category, as: "category" },
+        { model: Status, as: "status" },
+        { model: Photo, as: "photos" },
+      ],
+    });
+
+    console.log("Mes annonces :", myListings);
+    res.status(200).json(myListings);
+
+  } catch (error) {
+    console.error("ERREUR my listings :", error);
+    throw new HttpError("Failed to display my listings", 404);
+  }
+
 }
 
 export async function updateListing() {

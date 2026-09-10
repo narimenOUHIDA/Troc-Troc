@@ -8,7 +8,6 @@ class CategoryController {
         try {
             const categories = await Category.findAll();
             res.status(200).json(categories)
-            console.log("this is ", categories)
         } catch (error) {
             throw new HttpError("Not found", 404)
         }

@@ -4,10 +4,13 @@ import cors from "cors";
 
 // On importe notre package express
 import express from 'express';
+import path from "path";
+
 
 import listingsRouter from './routes/listings.routes.js';
 import conversationsRouter from './routes/conversations.routes.js';
-import categoryRoutes from './routes/category.router.js'
+import categoryRouter from './routes/category.router.js';
+import photoRouter from './routes/photo.router.js';
 
 // Import local modules
 import authRouter from './routes/auth.router.js';
@@ -28,8 +31,13 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 app.use(authRouter);
 
-app.use("/categories", categoryRoutes);
+app.use("/categories", categoryRouter);
+
 app.use('/api/v1/annonces', listingsRouter);
+
+app.use("/photos", photoRouter);
+app.use("/uploads", express.static("uploads"));
+
 app.use('/api/v1/conversations', conversationsRouter);
 
 // Route par défaut si aucune route n'a été trouvée

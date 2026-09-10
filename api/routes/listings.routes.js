@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getListings, getListingById, createListing, updateListing, deleteListing } from "../controllers/listings.controller.js";
+import { getListings, getMyListings, getListingById, createListing, updateListing, deleteListing } from "../controllers/listings.controller.js";
 import { validateToken } from '../middlewares/auth.middleware.js';
 import { createListingSchema } from '../middlewares/listings.middleware.js';
 
@@ -7,14 +7,15 @@ import { createListingSchema } from '../middlewares/listings.middleware.js';
 const router = Router();
 
 router.get("/", getListings);
-router.get("/listingsList", getListings);
 
-router.get("/listings/:id ", getListingById);
+router.get("/mes-annonces", validateToken, getMyListings);
 
-router.post("/listings", validateToken, createListingSchema, createListing);
+router.get("/:id ", getListingById);
 
-router.patch("/listings/:id ", updateListing);
+router.post("/", validateToken, createListingSchema, createListing);
 
-router.delete("/listings/:id ", deleteListing);
+router.patch("/:id ", updateListing);
+
+router.delete("/:id ", deleteListing);
 
 export default router;

@@ -1,29 +1,55 @@
 <script>
   import Header from '$lib/Header.svelte';
-  import api from '$lib/api';
+  import { onMount } from 'svelte';
+  import api from '$lib/api.js';
+  import apiPhoto from '$lib/apiPhoto.js';
   import { goto } from '$app/navigation';
+
+  let error = $state('');
 
   let title = $state('');
   let description = $state('');
   let price = $state('');
-  let categoryId = $state('');
-  let error = $state('');
+  let categoryId = $state();
 
-  async function onPublier() {
-    error = '';
+  let categories = $state([]);
 
+  let submitError = $state('');
+
+  onMount(async () => {
     try {
-      const data = await api('/listings', 'POST', {
-        title,
-        description,
-        price,
-        categoryId,
-      });
-
-      console.log('creation OK', data);
-      goto('/dashboard/mes-annonces');
+      categories = await api('/categories');
     } catch (e) {
       error = e.message;
+    }
+  });
+
+  let selectedFile = $state(null);
+
+  function onChoixFichier(event) {
+    selectedFile = event.currentTarget.files[0];
+  }
+
+  async function onPublier(event) {
+    event.preventDefault();
+    submitError = '';
+
+    try {
+      const listing = await api('/api/v1/annonces', 'POST', {
+        title,
+        description,
+        price: Number(price),
+        categoryId: Number(categoryId),
+      });
+
+      // 2. Upload des photos, une fois l'annonce créée
+      if (selectedFile) {
+        await apiPhoto(listing.id, selectedFile, 1);
+      }
+
+      goto('/dashboard');
+    } catch (e) {
+      submitError = e.message;
     }
   }
 </script>
@@ -32,12 +58,28 @@
   <title>TrocTroc — Déposer une annonce</title>
 </svelte:head>
 
-<Header connecte={false} />
+<Header />
 
 <main class="deposer-main">
   <h1>Déposer une annonce</h1>
+  <p class="deposer-lead">Renseignez les informations de votre article pour le mettre en ligne.</p>
 
-  <form class="deposer-form" onsubmit={onPublier}>
+  <form class="deposer-form" onsubmit={onPublier} enctype="multipart/form-data">
+    <h1>Déposer une annonce</h1>
+
+    <div class="form-group">
+      <label>
+        Photos
+        <input
+          type="file"
+          class="form-control-file"
+          name="uploaded_file"
+          accept="image/*"
+          onchange={onChoixFichier}
+        />
+      </label>
+    </div>
+
     <label>
       Titre de l'annonce
       <input type="text" name="titre" required maxlength="100" bind:value={title} />
@@ -59,10 +101,11 @@
 
       <label>
         Catégorie
+
         <select name="categorie" required bind:value={categoryId}>
-          <option value="" disabled selected>Choisir une catégorie</option>
-          {#each categoryId as categorieDisponible (categorieDisponible)}
-            <option value={categorieDisponible}>{categorieDisponible}</option>
+          <option value="">Choisir une catégorie</option>
+          {#each categories as categorie (categorie.id)}
+            <option value={categorie.id}>{categorie.name}</option>
           {/each}
         </select>
       </label>
@@ -70,38 +113,11 @@
 
     <div>
       <span class="deposer-label-photos">Photos</span>
-
-      <label
-        class="upload-zone"
-        class:glisse-actif={glisseActif}
-        ondragover={(event) => {
-          event.preventDefault();
-          glisseActif = true;
-        }}
-        ondragleave={() => (glisseActif = false)}
-        ondrop={onDrop}
-      >
-        <input type="file" accept="image/*" multiple hidden onchange={onChoixFichiers} />
-        Glissez vos photos ici ou cliquez pour parcourir
-      </label>
-
-      {#if photos.length > 0}
-        <ul class="upload-vignettes">
-          {#each photos as photo (photo.id)}
-            <li>
-              <img src={photo.url} alt="" />
-              <button
-                type="button"
-                onclick={() => retirerPhoto(photo.id)}
-                aria-label="Retirer la photo {photo.fichier.name}"
-              >
-                &times;
-              </button>
-            </li>
-          {/each}
-        </ul>
-      {/if}
     </div>
+
+    {#if submitError}
+      <p class="error">{submitError}</p>
+    {/if}
 
     <div class="deposer-actions">
       <a href="/" class="button-text">Annuler</a>
