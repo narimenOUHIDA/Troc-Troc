@@ -1,0 +1,139 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Informatique"
+    },
+    {
+      "id": 2,
+      "name": "Maison"
+    },
+    {
+      "id": 3,
+      "name": "Vêtements"
+    },
+    {
+      "id": 4,
+      "name": "Électroménager"
+    },
+    {
+      "id": 5,
+      "name": "Livres"
+    },
+    {
+      "id": 6,
+      "name": "Jouets"
+    }
+  ],
+  "statuses": [
+    {
+      "id": 1,
+      "name": "Disponible"
+    },
+    {
+      "id": 2,
+      "name": "Vendu"
+    }
+  ],
+  "postalCodes": [
+    {
+      "id": 1,
+      "postalCode": "69001",
+      "city": "Lyon",
+      "latitude": 45.7676,
+      "longitude": 4.8343
+    },
+    {
+      "id": 2,
+      "postalCode": "69100",
+      "city": "Villeurbanne",
+      "latitude": 45.7667,
+      "longitude": 4.8797
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "lastName": "Dupont",
+      "firstName": "Alice",
+      "email": "alice@example.com",
+      "password": "Password123!",
+      "registrationDate": "2026-03-01T09:00:00.000Z",
+      "postalCodeId": 1
+    },
+    {
+      "id": 2,
+      "lastName": "Martin",
+      "firstName": "Paul",
+      "email": "paul@example.com",
+      "password": "Password123!",
+      "registrationDate": "2026-04-15T09:00:00.000Z",
+      "postalCodeId": 2
+    }
+  ],
+  "listings": [
+    {
+      "id": 1,
+      "title": "MacBook Air M1",
+      "description": "MacBook Air M1 en très bon état.",
+      "price": 650,
+      "publicationDate": "2026-09-01T10:00:00.000Z",
+      "deletionDate": null,
+      "categoryId": 1,
+      "statusId": 1,
+      "userId": 1
+    },
+    {
+      "id": 2,
+      "title": "Canapé deux places",
+      "description": "Canapé gris en bon état.",
+      "price": 120,
+      "publicationDate": "2026-09-02T14:30:00.000Z",
+      "deletionDate": null,
+      "categoryId": 2,
+      "statusId": 1,
+      "userId": 2
+    }
+  ],
+  "photos": [
+    {
+      "id": 1,
+      "url": "https://example.com/macbook.jpg",
+      "order": 1,
+      "listingId": 1
+    },
+    {
+      "id": 2,
+      "url": "https://example.com/canape.jpg",
+      "order": 1,
+      "listingId": 2
+    }
+  ],
+  "conversations": [
+    {
+      "id": 1,
+      "creationDate": "2026-09-02T15:00:00.000Z",
+      "listingId": 1
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "content": "Bonjour, votre MacBook est-il toujours disponible ?",
+      "sentAt": "2026-09-02T15:05:00.000Z",
+      "isRead": false,
+      "conversationId": 1,
+      "userId": 2
+    }
+  ],
+  "participants": [
+    {
+      "userId": 1,
+      "conversationId": 1
+    },
+    {
+      "userId": 2,
+      "conversationId": 1
+    }
+  ]
+}

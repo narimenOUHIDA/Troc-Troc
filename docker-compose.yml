@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: troctroc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: troctroc
+      POSTGRES_PASSWORD: troctroc
+      POSTGRES_DB: troctroc
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U troctroc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./api
+    container_name: troctroc-api
+    restart: unless-stopped
+    env_file:
+      - ./api/.env
+    environment:
+      DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: troctroc-frontend
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
