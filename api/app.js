@@ -31,11 +31,11 @@ app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 app.use(authRouter);
 
-app.use("/categories", categoryRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 app.use('/api/v1/annonces', listingsRouter);
 
-app.use("/photos", photoRouter);
+app.use("/api/v1/photos", photoRouter);
 app.use("/uploads", express.static("uploads"));
 
 app.use('/api/v1/conversations', conversationsRouter);

@@ -1,9 +1,14 @@
 
 import { Link, NavLink } from 'react-router-dom';
 import { UserRound } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useState } from "react"
 import './Header.css';
 
 function Header() {
+
+    const { user, logout } = useAuth();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     return (
         <header className="site-header">
             <div className="header-container">
@@ -27,14 +32,46 @@ function Header() {
                         + Déposer une annonce
                     </Link>
 
-                    <Link
-                        to="/connexion"
-                        className="header-account"
-                        aria-label="Connexion à mon compte"
-                    >
-                        <span className="header-account-icon">
-                            <UserRound size={20} strokeWidth={1.8} />
-                        </span>                    </Link>
+                    {user ?
+                        <div className="header-user-menu">
+                            <button
+                                type="button"
+                                className="header-account"
+                                aria-label="Ouvrir le menu du compte"
+                                aria-expanded={isMenuOpen}
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <span className="header-account-icon">
+                                    <UserRound size={20} strokeWidth={1.8} />
+                                </span>
+                            </button>
+
+                            {isMenuOpen && (
+                                <div className="header-dropdown">
+                                    <Link
+                                        to="/mon-compte"
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        Mon compte
+                                    </Link>
+
+                                    <button type="button" onClick={logout}>
+                                        Se déconnecter
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        :
+                        <div className="header-auth-actions">
+                            <Link to="/connexion" className="header-login">
+                                Se connecter
+                            </Link>
+
+                            <Link to="/inscription" className="header-register">
+                                S'inscrire
+                            </Link>
+                        </div>
+                    }
                 </div>
             </div>
         </header>

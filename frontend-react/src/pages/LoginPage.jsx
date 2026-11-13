@@ -1,8 +1,36 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../api/auth";
+import { useMutation } from "@tanstack/react-query";
+
 import "../styles/auth.css";
+import { useAuth } from "../contexts/AuthContext";
 
 function LoginPage() {
+
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const { mutate, isError, error } = useMutation({
+        mutationFn: ({ email, password }) => loginUser(email, password),
+        onSuccess: (result) => {
+            login(result);
+            navigate("/");
+        }
+    });
+
+
+    const handelSubmit = (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        mutate({ email, password });
+
+    };
+
     return (
         <main className="auth-page">
             <section className="auth-card">
@@ -15,9 +43,8 @@ function LoginPage() {
                     <p>Connectez-vous à votre compte</p>
                 </div>
 
-                <form className="auth-form">
-                    {/* Zone réservée au message d'erreur React */}
-
+                <form onSubmit={handelSubmit} noValidate className="auth-form">
+                    {isError && <p>{error.message}</p>}
                     <div className="auth-field">
                         <label htmlFor="login-email">Adresse e-mail</label>
                         <input
@@ -53,7 +80,7 @@ function LoginPage() {
                         </a>
                     </div>
 
-                    <button type="submit" className="auth-submit">
+                    <button type="submit" className="auth-submit" >
                         Se connecter
                     </button>
                 </form>

@@ -6,6 +6,7 @@ import { createListingSchema } from '../middlewares/listings.middleware.js';
 
 const router = Router();
 
+
 router.get("/", getListings);
 
 router.get("/allListings", findAllListings);

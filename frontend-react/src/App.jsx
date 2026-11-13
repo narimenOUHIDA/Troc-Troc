@@ -10,6 +10,7 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import CreateListingPage from './pages/CreateListingPage';
 import ProfilePage from './pages/ProfilePage';
 import MessagesPage from './pages/MessagesPage';
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
 
@@ -22,8 +23,10 @@ function App() {
       <Route path="/inscription" element={<RegisterPage />} />
       <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
       <Route path="/deposer-annonce" element={<CreateListingPage />} />
-      <Route path="/mon-compte" element={<ProfilePage />} />
-      <Route path="/messagerie" element={<MessagesPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/mon-compte" element={<ProfilePage />} />
+        <Route path="/messagerie/:id" element={<MessagesPage />} />
+      </Route>
     </Routes>
   );
 }

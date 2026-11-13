@@ -10,6 +10,11 @@ import {
     Image as ImageIcon
 } from 'lucide-react';
 
+import { authUser } from '../api/auth';
+import { useQuery } from '@tanstack/react-query';
+import { getInitials } from '../utils/getInitials';
+
+
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DeleteListingModal from '../components/DeleteListingModal';
@@ -61,7 +66,27 @@ const statusLabels = {
     draft: 'Brouillon',
 };
 
+
 function ProfilePage() {
+
+    const { data, isPending, isError, error } = useQuery({
+        queryKey: ['profile'],
+        queryFn: () => authUser(),
+    });
+
+    if (isPending) return <p>Chargement du profil...</p>;
+
+    if (isError) return <p>Erreur : {error.message}</p>;
+
+    console.log("dat of user", data)
+
+    const { firstName, lastName, registrationDate } = data
+
+    const memberSince = new Date(registrationDate).toLocaleDateString("fr-FR", {
+        month: "long",
+        year: "numeric"
+    });
+
     return (
         <>
             <Header />
@@ -72,12 +97,12 @@ function ProfilePage() {
                     {/* Profil utilisateur */}
                     <section className="profile-header">
                         <div className="profile-user">
-                            <div className="profile-avatar">MC</div>
+                            <div className="profile-avatar"> {getInitials(lastName, firstName)}</div>
 
                             <div className="profile-user-info">
-                                <h1>Marie Curie</h1>
+                                <h1>{lastName} {firstName}</h1>
                                 <p>
-                                    Membre depuis mars 2024 · Lyon (69001)
+                                    Membre depuis {memberSince}· Lyon (69001)
                                 </p>
                             </div>
                         </div>

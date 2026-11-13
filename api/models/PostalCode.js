@@ -7,16 +7,17 @@ const PostalCode = sequelize.define(
         postalCode: {
             type: DataTypes.STRING(10),
             allowNull: false,
+            field: "postal_code"
         },
         city: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
         latitude: {
-            type: DataTypes.DECIMAL(9,6),
+            type: DataTypes.DECIMAL(9, 6),
         },
         longitude: {
-            type: DataTypes.DECIMAL(9,6),
+            type: DataTypes.DECIMAL(9, 6),
         },
 
     },

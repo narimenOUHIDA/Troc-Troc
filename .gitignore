@@ -13,3 +13,6 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Images uploadées par les utilisateurs
+/api/uploads/listings/*

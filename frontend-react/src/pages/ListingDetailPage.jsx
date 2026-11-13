@@ -1,32 +1,65 @@
 import { useParams } from 'react-router-dom';
 import { Link } from "react-router-dom";
 import { useState } from 'react';
+import { getListingById } from '../api/listings';
+import { useQuery } from '@tanstack/react-query';
+import { getImageUrl } from '../utils/getImageUrl';
+import { getInitials } from '../utils/getInitials';
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { createConversation } from "../api/conversations";
 
-import listings from "../data/listings";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import "./ListingDetailPage.css";
 
+import "./ListingDetailPage.css";
 
 function ListingDetailPage() {
 
-    let { id } = useParams();
-
     const [isFavorite, setIsFavorite] = useState(false);
+    const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-    const listing = listings.find((listing) => listing.id === Number(id));
+    const { id } = useParams();
+
+    const navigate = useNavigate();
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: createConversation,
+        onSuccess: (result) => {
+            const conversation = result.data;
+            navigate(`/messagerie/${conversation.id}`);
+        },
+    });
+
+    const { data: listing, isPending: isPendingListing, isError: isErrorListing, error } = useQuery({
+        queryKey: ['listingDetails', id],
+        queryFn: () => getListingById(id),
+    });
+
+    if (isPendingListing) {
+        return <p>Chargement de l'annonce...</p>;
+    }
+
+    if (isErrorListing) {
+        return <p>Erreur : {error.message}</p>;
+    }
 
     if (!listing) {
         return <p>Annonce introuvable</p>;
     }
 
-    const { title, city, imageUrl, price, Description } = listing;
 
+    const { category, photos, title, description, price, user, status, publicationDate } = listing;
+
+
+
+    const date = new Date(publicationDate).toLocaleDateString('fr-FR')
 
     return (
 
         <>
             <Header />
+
             <main className="listing-detail-page">
                 <nav className="detail-breadcrumb">
                     <Link to="/">Accueil</Link>
@@ -40,7 +73,7 @@ function ListingDetailPage() {
                     <section className="detail-content">
                         <div className="detail-gallery">
                             <div className="detail-main-image">
-                                <span className="detail-category">Meubles</span>
+                                <span className="detail-category">{category.name}</span>
 
                                 <div className="detail-image-actions">
                                     <button type="button" aria-label="Partager">
@@ -52,20 +85,26 @@ function ListingDetailPage() {
                                 </div>
 
                                 <div className="detail-image-placeholder">
-                                    <img src={imageUrl}></img>
+                                    <img src={getImageUrl(photos?.[selectedPhotoIndex]?.url)} alt={title}></img>
                                 </div>
+                                {photos.length > 0 &&
+                                    <span className="detail-image-counter">{selectedPhotoIndex + 1} / {photos.length}</span>
+                                }
 
-                                <span className="detail-image-counter">1 / 6</span>
                             </div>
 
                             <div className="detail-thumbnails">
-                                {Array.from({ length: 6 }, (_, index) => (
+                                {photos.map((photo, index) => (
                                     <button
                                         type="button"
-                                        className={index === 0 ? "thumbnail active" : "thumbnail"}
-                                        key={index}
+                                        className={index === selectedPhotoIndex ? "thumbnail active" : "thumbnail"}
+                                        key={photo.id}
+                                        onClick={() => setSelectedPhotoIndex(index)}
                                     >
-                                        <span>Photo {index + 1}</span>
+                                        <img
+                                            src={getImageUrl(photo.url)}
+                                            alt={`Photo ${index + 1} de ${title}`}
+                                        />
                                     </button>
                                 ))}
                             </div>
@@ -74,7 +113,7 @@ function ListingDetailPage() {
                         <div className="detail-heading">
                             <h1>{title}</h1>
                             <p className="detail-meta">
-                                Publié il y a 2 jours · Réf. #TT-48213
+                                Publié le {date}
                             </p>
                             <p className="detail-price">{price}€</p>
 
@@ -86,9 +125,7 @@ function ListingDetailPage() {
 
                         <section className="detail-section">
                             <h2>Description</h2>
-                            <p>
-                                {Description}
-                            </p>
+                            <p>{description}</p>
                         </section>
 
                         <section className="detail-section">
@@ -96,16 +133,13 @@ function ListingDetailPage() {
 
                             <dl className="detail-specifications">
                                 <dt>Catégorie</dt>
-                                <dd>Meubles</dd>
+                                <dd>{category.name}</dd>
 
-                                <dt>État</dt>
-                                <dd>Bon état</dd>
-
-                                <dt>Livraison</dt>
-                                <dd>À convenir avec le vendeur</dd>
+                                <dt>Statu</dt>
+                                <dd>{status.name}</dd>
 
                                 <dt>Localisation</dt>
-                                <dd>{city}</dd>
+                                <dd>{user.PostalCode.city}</dd>
                             </dl>
                         </section>
                     </section>
@@ -113,25 +147,27 @@ function ListingDetailPage() {
                     <aside className="detail-sidebar">
                         <div className="seller-card">
                             <div className="seller-profile">
-                                <div className="seller-avatar">JD</div>
+                                <div className="seller-avatar">
+                                    {getInitials(user.firstName, user.lastName)}
+                                </div>
 
                                 <div>
-                                    <h2>Julie D.</h2>
-                                    <p>Membre depuis mars 2024</p>
+                                    <h2 color='red'>{(user.firstName).toUpperCase()}</h2>
                                 </div>
                             </div>
 
-                            <div className="seller-stats">
-                                <strong>12</strong>
-                                <span>Annonces actives</span>
-                            </div>
 
-                            <p className="seller-location">⌖ Lyon 3e</p>
+                            <p className="seller-location">{user.PostalCode.city}</p>
                         </div>
 
                         <div className="seller-actions">
-                            <button type="button" className="contact-button">
-                                Contacter le vendeur
+                            <button
+                                type="button"
+                                className="contact-button"
+                                disabled={isPending}
+                                onClick={() => mutate(listing.id)}
+                            >
+                                {isPending ? "Chargement..." : "Contacter le vendeur"}
                             </button>
 
                             <button type="button" className="email-button">

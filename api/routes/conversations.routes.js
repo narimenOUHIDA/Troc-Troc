@@ -5,8 +5,11 @@ import {
   getConversations,
 } from "../controllers/conversations.controller.js";
 import { createMessage, getConversationMessages } from "../controllers/messages.controller.js";
+import { validateToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+
+router.use(validateToken);  // appliquer le validateToken middlewares une seul fois sur toute les routes
 
 router.get("/", getConversations);
 router.post("/", createConversation);

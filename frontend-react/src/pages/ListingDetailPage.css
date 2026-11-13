@@ -87,7 +87,7 @@
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: center;
+    align-items: normal;
     justify-content: center;
     color: #9c9d90;
     font-size: 16px;
@@ -355,4 +355,35 @@
     .detail-specifications {
         grid-template-columns: 110px 1fr;
     }
+
+    .detail-thumbnails {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+
+}
+
+.detail-thumbnails .thumbnail {
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #f3f3f3;
+}
+
+.detail-thumbnails .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.detail-thumbnails .thumbnail.active {
+    border-color: #2563eb;
 }

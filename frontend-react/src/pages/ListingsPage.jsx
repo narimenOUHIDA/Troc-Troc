@@ -1,11 +1,15 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
 import Header from '../components/Header';
 import ListingCard from '../components/ListingCard';
-import listings from '../data/listings';
 import SearchBar from '../components/SearchBar';
+
+import { useQuery } from '@tanstack/react-query';
+import { getListings } from '../api/listings';
+import { getCategories } from '../api/categories';
+import { getImageUrl } from '../utils/getImageUrl';
+
 
 import './ListingsPage.css';
 
@@ -13,7 +17,17 @@ function ListingsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get('q') || '');
 
-    const filteredListings = listings.filter((listing) =>
+    const { data, isPending, isError, error } = useQuery({
+        queryKey: ['listings'],
+        queryFn: getListings,
+    });
+
+    const { data: categories, isPending: isPendingCat, isError: isErrorCat, error: errorCat } = useQuery({
+        queryKey: ['categories'],
+        queryFn: getCategories,
+    });
+
+    const filteredListings = data?.filter((listing) =>
         listing.title.toLowerCase().includes(query.toLowerCase())
     );
 
@@ -81,36 +95,12 @@ function ListingsPage() {
 
                             <div className="filter-section">
                                 <h3>Catégories</h3>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Meubles</span>
-                                </label>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Vélos</span>
-                                </label>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Vêtements</span>
-                                </label>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Électroménager</span>
-                                </label>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Livres</span>
-                                </label>
-
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span>Jouets</span>
-                                </label>
+                                {categories?.map((category) =>
+                                    <label key={category.id} className="filter-option">
+                                        <input type="checkbox" />
+                                        <span>{category.name}</span>
+                                    </label>
+                                )}
                             </div>
 
                             <div className="filter-section">
@@ -165,15 +155,18 @@ function ListingsPage() {
                             aria-label="Résultats des annonces"
                         >
                             <div className="listings-grid">
-                                {filteredListings.map((listing) => (
+                                {filteredListings?.map((listing) => (
                                     <ListingCard
                                         key={listing.id}
-                                        {...listing}
+                                        id={listing.id}
+                                        imageUrl={getImageUrl(listing.photos?.[0]?.url)}
+                                        title={listing.title}
+                                        price={listing.price}
                                     />
                                 ))}
                             </div>
 
-                            {filteredListings.length === 0 && (
+                            {filteredListings?.length === 0 && (
                                 <p className="listings-empty">
                                     Aucune annonce trouvée.
                                 </p>

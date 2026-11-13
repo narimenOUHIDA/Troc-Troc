@@ -286,3 +286,66 @@
         flex-wrap: wrap;
     }
 }
+
+/* Boutons du Header */
+
+.header-auth-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-login,
+.header-register {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Se connecter */
+.header-login {
+    background: #fff;
+    color: #27805c;
+    border: 1px solid #27805c;
+}
+
+.header-login:hover {
+    background: #edf7f1;
+}
+
+/* S'inscrire */
+.header-register {
+    background: #27805c;
+    color: #fff;
+    border: 1px solid #27805c;
+}
+
+.header-register:hover {
+    background: #206a4c;
+}
+
+.header-login:focus-visible,
+.header-register:focus-visible {
+    outline: 3px solid #a5d6bd;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .header-auth-actions {
+        gap: 6px;
+    }
+
+    .header-login,
+    .header-register {
+        padding: 0 12px;
+        font-size: 11px;
+    }
+}

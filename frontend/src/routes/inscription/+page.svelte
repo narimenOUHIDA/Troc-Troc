@@ -43,7 +43,7 @@
         postalCodeId,
       });
       console.log('register OK', data);
-      goto('/dashboard');
+      goto('/connexion');
     } catch (e) {
       error = e.message;
     }

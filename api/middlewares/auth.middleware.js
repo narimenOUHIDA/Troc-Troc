@@ -8,9 +8,7 @@ export function validateUser(req, res, next) {
     // Définition du JSON attendu
     const schema = Joi.object({
         email: Joi.string().email().required(),
-        password: Joi.string()
-            .pattern(new RegExp("^[a-zA-Z0-9]{8,30}$"))
-            .required(),
+        password: Joi.string().required(),
     });
 
     const { error } = schema.validate(req.body);
@@ -53,7 +51,7 @@ export async function validateToken(req, res, next) {
     }
 
     const user = await User.findByPk(tokenPayload.user_id, {
-        attributes: ["id", "lastName", "firstName", "email", "postalCodeId"]
+        attributes: ["id", "lastName", "firstName", "email", "postalCodeId", "registrationDate"]
     });
 
     if (!user) {
@@ -74,7 +72,10 @@ export function validateRegister(req, res, next) {
         password: Joi.string()
             .pattern(new RegExp("^[a-zA-Z0-9]{8,30}$"))
             .required(),
-        postalCodeId: Joi.number().integer().required(),
+        //postalCodeId: Joi.number().integer().required(),
+        postalCode: Joi.string()
+            .pattern(/^\d{5}$/)
+            .required(),
     });
 
     const { error } = schema.validate(req.body);

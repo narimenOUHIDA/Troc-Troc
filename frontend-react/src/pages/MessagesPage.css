@@ -108,6 +108,8 @@
     font: inherit;
     text-align: left;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
 .conversation-item:hover {
@@ -447,4 +449,10 @@
     .chat-compose {
         margin: 12px;
     }
+}
+
+.chat-error {
+    color: #b42318;
+    font-size: 0.875rem;
+    margin-top: 8px;
 }

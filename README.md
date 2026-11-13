@@ -8,7 +8,7 @@ Cahier des charges, user stories, wireframes, MCD/MLD et dictionnaire des donné
 
 ## Stack
 
-- Svelte (SvelteKit) — frontend
+- React — frontend
 - Node.js / Express — backend
 - PostgreSQL / Sequelize — base de données
 - JWT — authentification
@@ -18,7 +18,7 @@ Cahier des charges, user stories, wireframes, MCD/MLD et dictionnaire des donné
 
 ```text
 apo-dwwm-troctroc/
-├── frontend/          # Application SvelteKit
+├── frontend/          # Application React
 ├── backend/           # API Express (en cours de mise en place)
 └── docs/conception/   # Cahier des charges, user stories, wireframes, MCD/MLD
 ```
@@ -32,7 +32,7 @@ apo-dwwm-troctroc/
 ## Installation
 
 ```bash
-git clone git@github.com:O-clock-Kyoto/apo-dwwm-troctroc.git
+git clone git@github.com:narimenOUHIDA/Troc-Troc.git
 cd apo-dwwm-troctroc
 npm install
 ```
@@ -41,7 +41,7 @@ Le projet est un monorepo npm workspaces (`frontend`, `backend`).
 
 ## Lancer le projet
 
-Frontend (SvelteKit) :
+Frontend (React) :
 
 ```bash
 npm run dev --workspace=frontend

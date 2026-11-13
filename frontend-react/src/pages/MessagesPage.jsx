@@ -1,93 +1,102 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useAuth } from "../contexts/AuthContext";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef, useEffect } from 'react'
 import {
     Search,
     Send,
-    Paperclip,
     Image as ImageIcon,
-    MessageCircle
 } from 'lucide-react';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-
+import {
+    getConversationById,
+    getConversations,
+    createMessage
+} from "../api/conversations";
 import './MessagesPage.css';
 
-const demoConversations = [
-    {
-        id: 1,
-        name: 'Julie D.',
-        initials: 'J',
-        listing: 'Canapé 3 places en tissu gris',
-        lastMessage: 'Bonjour, il est toujours dispo ?',
-        time: '10:12',
-        unread: 2,
-        online: true,
-    },
-    {
-        id: 2,
-        name: 'Marc T.',
-        initials: 'M',
-        listing: 'Vélo enfant 20 pouces',
-        lastMessage: 'Vous : Oui, je peux le garder',
-        time: 'Hier',
-        unread: 0,
-        online: false,
-    },
-    {
-        id: 3,
-        name: 'Sophie L.',
-        initials: 'S',
-        listing: 'Table basse en bois',
-        lastMessage: 'Parfait, à demain alors !',
-        time: 'Lun',
-        unread: 0,
-        online: false,
-    },
-    {
-        id: 4,
-        name: 'Ahmed B.',
-        initials: 'A',
-        listing: 'Console de jeux rétro',
-        lastMessage: 'Est-ce que la manette est incluse ?',
-        time: '22 août',
-        unread: 1,
-        online: false,
-    },
-];
-
-const demoMessages = [
-    {
-        id: 1,
-        text: 'Bonjour, il est toujours disponible ?',
-        time: '10:08',
-        sender: 'received',
-    },
-    {
-        id: 2,
-        text: 'Oui toujours disponible !',
-        time: '10:15',
-        sender: 'sent',
-    },
-    {
-        id: 3,
-        text: 'Super, je peux passer le récupérer ce soir ?',
-        time: '10:22',
-        sender: 'received',
-    },
-    {
-        id: 4,
-        text: 'Avec plaisir, vers 19h ?',
-        time: '10:25',
-        sender: 'sent',
-    },
-];
-
 function MessagesPage() {
+    const { id } = useParams();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const formRef = useRef(null); //pour vider le formulaire après l'envoi.
+    const messagesEndRef = useRef(null); //pour faire défiler la discussion jusqu'en bas.
+
+    const { mutate, isPending: isSending, isError: isErrorMessage, error: errorMessage } = useMutation({
+        mutationFn: ({ id, content }) => createMessage(id, content),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["conversation", id],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["conversations"],
+            });
+
+            formRef.current?.reset();
+        }
+    });
+
+    const {
+        data: conversations = [],
+        isPending: isPendingConversations,
+        isError: isErrorConversations,
+    } = useQuery({
+        queryKey: ["conversations"],
+        queryFn: getConversations,
+        refetchInterval: 3000,
+    });
+
+
+    const { data: conversation, isPending, isError, error } = useQuery({
+        queryKey: ['conversation', id],
+        queryFn: () => getConversationById(id),
+        refetchInterval: 3000, // affiche les nouveau mesg reçu sans actualiser tantque je suis dans la page 
+    });
+
+    useEffect(() => {
+        if (conversation?.messages) {
+            messagesEndRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
+        }
+    }, [conversation?.messages]);
+
+    if (isPending) {
+        return <p>Chargement de la Conversation...</p>;
+    }
+
+    if (isError) {
+        return <p>Erreur : {error.message}</p>;
+    }
+
+    if (!conversation) {
+        return <p>Conversation introuvable</p>;
+    }
+
+    console.log("Toutes les conversations :", conversations);
+
+    const handelSent = (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const content = formData.get("content")?.trim();
+        if (!content) return;
+
+        mutate({ id, content });
+    }
+
+    const contact = conversation.users.find( //l'autre participant de la conversation.
+        (participant) => participant.id !== user.id
+    );
+
     return (
         <>
             <Header />
-
             <main className="messages-page">
                 <div className="messages-container">
 
@@ -119,73 +128,66 @@ function MessagesPage() {
                             </div>
 
                             <div className="conversations-list">
-                                {demoConversations.map((conversation) => (
-                                    <button
-                                        type="button"
-                                        className={`conversation-item ${conversation.id === 1
-                                                ? 'selected'
-                                                : ''
-                                            }`}
-                                        key={conversation.id}
-                                    >
-                                        <div className="conversation-avatar">
-                                            {conversation.initials}
+                                {conversations.map((item) => {
+                                    const interlocuteur = item.users.find(
+                                        (participant) => participant.id !== user.id
+                                    );
 
-                                            {conversation.online && (
-                                                <span className="conversation-online-dot" />
-                                            )}
-                                        </div>
+                                    const dernierMessage = item.messages.at(-1);
 
-                                        <div className="conversation-info">
-                                            <div className="conversation-top">
-                                                <strong>
-                                                    {conversation.name}
-                                                </strong>
-                                                <span>
-                                                    {conversation.time}
-                                                </span>
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            to={`/messagerie/${item.id}`}
+                                            className={`conversation-item ${item.id === Number(id) ? "selected" : ""
+                                                }`}
+                                        >
+                                            <div className="conversation-avatar">
+                                                {interlocuteur?.firstName?.charAt(0).toUpperCase()}
+                                                {interlocuteur?.lastName?.charAt(0).toUpperCase()}
                                             </div>
 
-                                            <p className="conversation-listing-title">
-                                                {conversation.listing}
-                                            </p>
+                                            <div className="conversation-info">
+                                                <div className="conversation-top">
+                                                    <strong>
+                                                        {interlocuteur?.firstName} {interlocuteur?.lastName}
+                                                    </strong>
+                                                </div>
 
-                                            <p className="conversation-preview">
-                                                {conversation.lastMessage}
-                                            </p>
-                                        </div>
+                                                <p className="conversation-listing-title">
+                                                    {item.listing.title}
+                                                </p>
 
-                                        {conversation.unread > 0 && (
-                                            <span className="conversation-unread">
-                                                {conversation.unread}
-                                            </span>
-                                        )}
-                                    </button>
-                                ))}
+                                                <p className="conversation-preview">
+                                                    {dernierMessage?.content ?? "Aucun message"}
+                                                </p>
+                                            </div>
+
+                                            {item.unreadCount > 0 && (
+                                                <span className="conversation-unread">
+                                                    {item.unreadCount}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </aside>
 
-                        {/* Zone de discussion */}
                         <section className="chat-panel">
-
-                            {/* En-tête de la conversation */}
                             <div className="chat-header">
                                 <div className="chat-contact">
                                     <div className="conversation-avatar">
-                                        J
-                                        <span className="conversation-online-dot" />
+                                        {contact?.firstName?.charAt(0).toUpperCase()}
                                     </div>
 
                                     <div>
-                                        <h2>Julie D.</h2>
-                                        <p className="chat-online">
-                                            En ligne
-                                        </p>
+                                        <h2>{contact?.firstName} {contact?.lastName}</h2>
                                     </div>
                                 </div>
 
                                 <Link
-                                    to="/annonces/1"
+                                    to={`/annonces/${conversation.listingId}`}
                                     className="chat-listing-link"
                                 >
                                     <div className="chat-listing-image">
@@ -193,71 +195,64 @@ function MessagesPage() {
                                     </div>
 
                                     <div>
-                                        <strong>
-                                            Canapé 3 places en tissu gris
-                                        </strong>
-                                        <span>120 €</span>
+                                        <strong>{conversation.listing.title}</strong>
+                                        <span>{conversation.listing.price} €</span>
                                     </div>
                                 </Link>
                             </div>
 
-                            {/* Messages */}
+
                             <div className="chat-messages">
                                 <div className="chat-date">
                                     Aujourd'hui, 10:08
                                 </div>
-
-                                {demoMessages.map((message) => (
+                                {conversation.messages.map((message) => (
                                     <div
-                                        className={`chat-message-row ${message.sender}`}
                                         key={message.id}
+                                        className={`chat-message-row ${message.userId === user.id ? "sent" : "received"
+                                            }`}
                                     >
                                         <div className="chat-message-content">
                                             <div className="chat-bubble">
-                                                {message.text}
+                                                {message.content}
                                             </div>
 
                                             <span className="chat-message-time">
-                                                {message.time}
-                                                {message.sender === 'sent' && (
-                                                    <span> ✓✓</span>
-                                                )}
+                                                {new Date(message.sentAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                                             </span>
                                         </div>
                                     </div>
                                 ))}
+                                <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Barre de saisie */}
-                            <form className="chat-compose">
-                                <button
-                                    type="button"
-                                    className="chat-attachment-button"
-                                    aria-label="Joindre un fichier"
-                                >
-                                    <Paperclip size={19} />
-                                </button>
 
+                            <form className="chat-compose" ref={formRef} onSubmit={handelSent}>
                                 <input
                                     type="text"
+                                    name="content"
                                     placeholder="Écrire un message..."
                                     aria-label="Écrire un message"
                                 />
 
                                 <button
-                                    type="button"
+                                    type="submit"
                                     className="chat-send-button"
                                     aria-label="Envoyer le message"
+                                    disabled={isSending}
                                 >
                                     <Send size={18} />
                                 </button>
                             </form>
-
+                            {isErrorMessage && (
+                                <p className="chat-error" role="alert">
+                                    {errorMessage?.message || "Impossible d'envoyer le message."}
+                                </p>
+                            )}
                         </section>
                     </div>
                 </div>
-            </main>
-
+            </main >
             <Footer />
         </>
     );

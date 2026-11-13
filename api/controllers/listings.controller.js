@@ -168,6 +168,11 @@ export async function getListingById(req, res) {
 
   } catch (error) {
     console.log('Error while fetching listing:', error);
+
+    if (error instanceof HttpError) {
+      throw error;
+    }
+
     throw new HttpError('Internal server error', 500);
   }
 }

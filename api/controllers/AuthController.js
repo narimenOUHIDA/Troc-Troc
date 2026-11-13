@@ -1,4 +1,4 @@
-import { User } from "../models/index.js";
+import { User, PostalCode } from "../models/index.js";
 import HttpError from "../utils/HttpError.js";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
@@ -13,7 +13,7 @@ class AuthController {
                 firstName,
                 email,
                 password,
-                postalCodeId
+                postalCode
             } = req.body; //recupére le body de la requete 
 
             // Chercher si le user existant dans BDD à partir de son email
@@ -26,6 +26,14 @@ class AuthController {
             // Calculer le hash du mot de passe
             const hachedPassword = await argon2.hash(password);
 
+            const location = await PostalCode.findOne({
+                where: { postalCode }
+            });
+
+            if (!location) {
+                throw new HttpError("Code postal non pris en charge", 400);
+            }
+
             // Enregistrer l'utilisateur dans la BDD avec le mot de passe hashé
             const newUser = await User.create({
                 lastName,
@@ -33,7 +41,7 @@ class AuthController {
                 email,
                 password: hachedPassword,
                 registrationDate: new Date(),
-                postalCodeId
+                postalCodeId: location.id
             });
 
             // 201 -> ressource created
@@ -75,7 +83,7 @@ class AuthController {
             const token = jwt.sign(
                 { user_id: foundUser.id },
                 process.env.JWT_SECRET,
-                { expiresIn: "2h" },
+                { expiresIn: "24h" },
             );
 
             res.status(200).json({
@@ -102,6 +110,7 @@ class AuthController {
                 firstName: req.user.firstName,
                 lastName: req.user.lastName,
                 email: req.user.email,
+                registrationDate: req.user.registrationDate
             })
 
         } catch (error) {
@@ -111,4 +120,5 @@ class AuthController {
 }
 
 const authController = new AuthController();
+
 export default authController;

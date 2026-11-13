@@ -1,8 +1,53 @@
 
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { registerUser } from "../api/auth";
+import { useState } from "react";
+
 import "../styles/auth.css";
 
 function RegisterPage() {
+    const navigate = useNavigate();
+    const [passwordError, setPasswordError] = useState("");
+
+    const {
+        mutate,
+        isPending,
+        isError,
+        error
+    } = useMutation({
+        mutationFn: registerUser,
+        onSuccess: () => {
+            navigate("/connexion");
+        },
+    });
+
+    function handleSubmit(event) {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        setPasswordError("");
+        const password = formData.get("password");
+        const confirmPassword = formData.get("confirmPassword");
+
+        if (password !== confirmPassword) {
+            setPasswordError("Les mots de passe ne correspondent pas.");
+            return;
+        }
+
+        const userData = {
+            firstName: formData.get("firstName").trim(),
+            lastName: formData.get("lastName").trim(),
+            email: formData.get("email").trim(),
+            postalCode: formData.get("postalCode").trim(),
+            password,
+        };
+
+        mutate(userData);
+    }
+
     return (
         <main className="auth-page">
             <section className="auth-card">
@@ -15,7 +60,7 @@ function RegisterPage() {
                     <p>Rejoignez la communauté Troc Troc</p>
                 </div>
 
-                <form className="auth-form">
+                <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="auth-name-fields">
                         <div className="auth-field">
                             <label htmlFor="register-firstname">Prénom</label>
@@ -88,8 +133,12 @@ function RegisterPage() {
                             autoComplete="new-password"
                             required
                         />
-                        {/* Zone réservée à l'erreur de confirmation */}
                     </div>
+                    {passwordError && (
+                        <p className="auth-error" role="alert">
+                            {passwordError}
+                        </p>
+                    )}
 
                     <label className="auth-checkbox auth-terms">
                         <input type="checkbox" name="acceptTerms" required />
@@ -99,8 +148,18 @@ function RegisterPage() {
                         </span>
                     </label>
 
-                    <button type="submit" className="auth-submit">
-                        Créer mon compte
+                    {isError && (
+                        <p className="auth-error" role="alert">
+                            {error.message}
+                        </p>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="auth-submit"
+                        disabled={isPending}
+                    >
+                        {isPending ? "Création du compte..." : "Créer mon compte"}
                     </button>
                 </form>
 

@@ -3,28 +3,17 @@ import Joi from "joi";
 import { Op, fn, col } from "sequelize";
 import { Conversation, Listing, Message, Participant, User } from "../models/index.js";
 
-// NOTE: pas encore d'authentification (feat/auth-api pas mergée) : userId est
-// passé explicitement par le client en attendant un vrai middleware JWT/req.user.
 
-const listConversationsQuerySchema = Joi.object({
-  userId: Joi.number().integer().positive().required(),
-});
 
 const createConversationSchema = Joi.object({
   listingId: Joi.number().integer().positive().required(),
-  userId: Joi.number().integer().positive().required(),
 });
 
-// GET /api/v1/conversations?userId=
+
 // US15 — conversations où l'utilisateur figure comme participant (via la table PARTICIPE).
 export async function getConversations(req, res) {
-  const { error, value } = listConversationsQuerySchema.validate(req.query);
 
-  if (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-  }
-
-  const user = await User.findByPk(value.userId, {
+  const user = await User.findByPk(req.user.id, {
     include: [
       {
         model: Conversation,
@@ -48,7 +37,7 @@ export async function getConversations(req, res) {
   // Nombre de messages non lus envoyés par l'autre participant, groupés par conversation.
   const unreadRows = await Message.findAll({
     attributes: ["conversationId", [fn("COUNT", col("id")), "unreadCount"]],
-    where: { conversationId: conversationIds, userId: { [Op.ne]: value.userId }, isRead: false },
+    where: { conversationId: conversationIds, userId: { [Op.ne]: req.user.id }, isRead: false },
     group: ["conversationId"],
     raw: true,
   });
@@ -64,14 +53,9 @@ export async function getConversations(req, res) {
   return res.status(StatusCodes.OK).json({ data: conversations });
 }
 
-// GET /api/v1/conversations/:id?userId=
+// GET /api/v1/conversations/:id
 // US16 — messages d'une conversation (l'utilisateur doit en être participant).
 export async function getConversationById(req, res) {
-  const { error, value } = listConversationsQuerySchema.validate(req.query);
-
-  if (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-  }
 
   const conversation = await Conversation.findByPk(req.params.id, {
     include: [
@@ -96,8 +80,9 @@ export async function getConversationById(req, res) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: "Conversation introuvable" });
   }
 
+  //empêche un utilisateur connecté de consulter une conversation à laquelle il ne participe pas.
   const isParticipant = await Participant.findOne({
-    where: { conversationId: conversation.id, userId: value.userId },
+    where: { conversationId: conversation.id, userId: req.user.id },
   });
 
   if (!isParticipant) {
@@ -107,7 +92,7 @@ export async function getConversationById(req, res) {
   // On consulte la conversation : les messages de l'autre participant passent en "lu".
   await Message.update(
     { isRead: true },
-    { where: { conversationId: conversation.id, userId: { [Op.ne]: value.userId }, isRead: false } },
+    { where: { conversationId: conversation.id, userId: { [Op.ne]: req.user.id }, isRead: false } },
   );
 
   return res.status(StatusCodes.OK).json({ data: conversation });
@@ -122,7 +107,9 @@ export async function createConversation(req, res) {
     return res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
   }
 
-  const { listingId, userId } = value;
+  const userId = req.user.id
+
+  const { listingId } = value;
 
   const listing = await Listing.findByPk(listingId);
 

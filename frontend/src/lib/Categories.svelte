@@ -48,7 +48,7 @@
   {:else if erreur}
     <p class="categories-message categories-erreur">{erreur}</p>
   {:else}
-    <div class="categories-grille">
+    <div class="categories-grid">
       {#each categories as categorie (categorie.id)}
         <a class="categorie-tuile" href={`/annonces?categoryId=${categorie.id}`}>
           <span class="categorie-icone" data-icone={icone(categorie.name)}>
@@ -201,12 +201,6 @@
 </section>
 
 <style>
-  .categories-section {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem;
-  }
-
   .categories-section h2 {
     font-family: Cambria, Georgia, serif;
     font-size: 1.5rem;
@@ -223,20 +217,23 @@
     color: #c0392b;
   }
 
-  .categories-grille {
+  .categories-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 1rem;
   }
 
   @media (max-width: 900px) {
-    .categories-grille {
+    .categories-grid {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
   @media (max-width: 520px) {
-    .categories-grille {
+    .categories-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
